@@ -1,11 +1,12 @@
 from flask import Flask, render_template, request
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.sql import text
+from db import Food_stats, db, Food
 
 app = Flask(__name__)
 
 app.config["SQLALCHEMY_DATABASE_URI"] = "postgresql:///postgres"
-db = SQLAlchemy(app)
+db.init_app(app)
 
 
 
@@ -16,42 +17,13 @@ def page(id):
     food_name = result.fetchone()
     return "Tämä on sivu " + str(id) + " eli " + food_name.foodname
 
-
-
-class Food(db.Model):
-    """This class acts as mapping between database object and Python code"""
-
-    foodid = db.Column(db.Integer, primary_key=True)
-    edport = db.Column(db.Integer)
-    foodtype = db.Column(db.String)
-    process = db.Column(db.String)
-    fuclassp = db.Column(db.String)
-    igclass = db.Column(db.String)
-    igclassp = db.Column(db.String)
-    fuclass = db.Column(db.String)
-    foodname = db.Column(db.String)
-
-    def to_dict(self):
-        return {
-            'foodid': self.foodid,
-            'edport': self.edport,
-            'foodtype': self.foodtype,
-            'process': self.process,
-            'fuclassp': self.fuclassp,
-            'igclass': self.igclass,
-            'igclassp': self.igclassp,
-            'fuclass': self.fuclass,
-            'foodname': self.foodname
-        }
-
-
 @app.route('/')
 def index():
-    return render_template('server_table.html')
+    return render_template('all_foods_table.html')
 
 @app.route('/api/data')
 def data():
-    query = Food.query
+    query = Food_stats.query
 
     # search filter:
 
@@ -60,8 +32,7 @@ def data():
     search = request.args.get('search') 
     if search:
         query = query.filter(db.or_(
-            Food.foodname.ilike(f'%{search}%'),
-            Food.foodtype.ilike(f'%{search}%')
+            Food_stats.foodname.ilike(f'%{search}%')
         ))
     total = query.count()
 
@@ -72,9 +43,9 @@ def data():
         for s in sort.split(','):
             direction = s[0]
             name = s[1:]
-            if name not in ['foodname', 'foodtype']:
+            if name not in ['foodname']:
                 name = 'foodname'
-            col = getattr(Food, name)
+            col = getattr(Food_stats, name)
             if direction == '-':
                 col = col.desc()
             order.append(col)
@@ -89,7 +60,7 @@ def data():
 
     # response
     return {
-        'data': [food.to_dict() for food in query],
+        'data': [food_stats.to_dict() for food_stats in query],
         'total': total,
     }
 
