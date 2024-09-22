@@ -50,7 +50,7 @@ class Food_stats(db.Model):
             'foodname': self.foodname,
             'energia_laskennallinen': self.energia_laskennallinen,
             'rasva': self.rasva,
-            'hiilihydraatti_imeytyvä': self.hiilihydraatti_imeytyvä,
+            'hiilihydraatti_imeytyva': self.hiilihydraatti_imeytyva,
             'hiilihydraatti_erotuksena': self.hiilihydraatti_erotuksena,
             'proteiini': self.proteiini,
             'alkoholi': self.alkoholi,
