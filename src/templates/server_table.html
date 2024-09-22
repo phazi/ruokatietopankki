@@ -1,0 +1,76 @@
+<html></html>
+  <head>
+    <title>Ruokatietopankki</title>
+    <link href="https://unpkg.com/gridjs/dist/theme/mermaid.min.css" rel="stylesheet" />
+    <style>
+      body {
+        font-family: Sans-Serif;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Tervetuloa ruokatietopankkiin!</h1>
+    <p><br><br>Tämä on aloitussivu. Voit hakea alla olevasta taulukosta kaikkia tietokannassa olevia ruoka-aineita. <br>
+      Kirjautumalla sisään voit lisätä ruoka-aineita suosikeiksi ja luoda reseptejä <br><br>
+    </p>
+    <div>
+      <h3>Kaikki ruoka-aineet</h3>
+      <hr>
+      <div id="table"></div>
+    </div>
+    <script src="https://unpkg.com/gridjs/dist/gridjs.umd.js"></script>
+    <script>
+      const updateUrl = (prev, query) => {
+        return prev + (prev.indexOf('?') >= 0 ? '&' : '?') + new URLSearchParams(query).toString();
+      };
+
+      new gridjs.Grid({
+        columns: [
+          { id: 'foodid', name: 'Food ID', formatter: (cell) => {
+            return gridjs.html('<a href="/foodpage/' + cell + '">' + cell + '</a>');
+          } },
+          { id: 'foodname', name: 'Food Name' },
+          { id: 'foodtype', name: 'Food Type' },
+          { id: 'process', name: 'Process', sort: false },
+          { id: 'fuclassp', name: 'FU Class P', sort: false },
+          { id: 'igclass', name: 'IG Class' },
+          { id: 'igclassp', name: 'IG Class P' },
+          { id: 'fuclass', name: 'FU Class' },
+          { id: 'edport', name: 'Edible Portion' },
+        ],
+        server: {
+          url: '/api/data',
+          then: results => results.data,
+          total: results => results.total,
+        },
+        search: {
+          enabled: true,
+          server: {
+            url: (prev, search) => {
+              return updateUrl(prev, {search});
+            },
+          },
+        },
+        sort: {
+          enabled: true,
+          multiColumn: true,
+          server: {
+            url: (prev, columns) => {
+              const columnIds = ['foodname', 'foodtype', 'process', 'fuclassp', 'igclass', 'igclassp', 'fuclass', 'edport'];
+              const sort = columns.map(col => (col.direction === 1 ? '+' : '-') + columnIds[col.index]);
+              return updateUrl(prev, {sort});
+            },
+          },
+        },
+        pagination: {
+          enabled: true,
+          server: {
+            url: (prev, page, limit) => {
+              return updateUrl(prev, {start: page * limit, length: limit});
+            },
+          },
+        },
+      }).render(document.getElementById('table'));
+    </script>
+  </body>
+</html>
