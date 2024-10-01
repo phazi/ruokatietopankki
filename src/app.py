@@ -2,10 +2,11 @@ from flask import Flask, render_template, request
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.sql import text
 from db import Food_stats, db, Food
+from os import getenv
 
 app = Flask(__name__)
-
-app.config["SQLALCHEMY_DATABASE_URI"] = "postgresql:///postgres"
+app.secret_key = getenv("SECRET_KEY")
+app.config["SQLALCHEMY_DATABASE_URI"] = getenv("DATABASE_URL")
 db.init_app(app)
 
 

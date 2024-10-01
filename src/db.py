@@ -37,7 +37,7 @@ class Food_stats(db.Model):
     foodname = db.Column(db.String)
     energia_laskennallinen = db.Column(db.Integer)
     rasva = db.Column(db.Integer)
-    hiilihydraatti_imeytyvä = db.Column(db.Integer)
+    hiilihydraatti_imeytyva = db.Column(db.Integer)
     hiilihydraatti_erotuksena = db.Column(db.Integer)
     proteiini = db.Column(db.Integer)
     alkoholi = db.Column(db.Integer)
