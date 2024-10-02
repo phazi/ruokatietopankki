@@ -1,0 +1,14 @@
+{% extends "layout.html" %}
+{% block title %}Kirjautuminen{% endblock %}
+{% block content %}
+{% if session.username %}
+<p>Olet jo kirjautuneena.</p>
+{% else %}
+<h2>Kirjaudu sisään</h2>
+<form action="/login" method="POST">
+Tunnus: <input type="text" name="username"> <br>
+Salasana: <input type="password" name="password"> <br>
+<input type="submit" value="Kirjaudu">
+</form>
+{% endif %}
+{% endblock %}

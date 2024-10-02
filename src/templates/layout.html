@@ -1,0 +1,23 @@
+<!doctype html>
+<head>
+    <title>Ruokatietopankki - {% block title %}{% endblock %}</title>
+    <style>
+        body {
+          font-family: Sans-Serif;
+        }
+    </style>
+</head>
+<body>
+    <h1><a href="/" style="text-decoration: none; color: coral;">Tervetuloa ruokatietopankkiin!</a></h1>
+    <p style="text-align: right">
+    {% if session.username %}
+    Olet kirjautunut nimellä {{ session.username }}<br>
+    <a href="/logout">Kirjaudu ulos</a>
+    {% else %}
+    <a href="/login">Kirjaudu sisään</a>
+    tai <a href="/register">Luo tunnus</a></p>
+    {% endif %}
+    <hr>
+    {% block content %}{% endblock %}
+    <hr>
+</body>

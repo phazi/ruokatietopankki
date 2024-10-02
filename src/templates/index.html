@@ -1,0 +1,75 @@
+{% extends "layout.html" %}
+{% block title %}Etusivu{% endblock %}
+{% block content %}
+
+  <head>
+    <link href="https://unpkg.com/gridjs/dist/theme/mermaid.min.css" rel="stylesheet" />
+  </head>
+  <body>
+    <p><br><br>Tämä on aloitussivu. Voit hakea alla olevasta taulukosta kaikkia tietokannassa olevia ruoka-aineita. <br>
+      Kirjautumalla sisään voit lisätä ruoka-aineita suosikeiksi ja luoda reseptejä <br><br>
+    </p>
+    <div>
+      <h3>Kaikki ruoka-aineet</h3>
+      <hr>
+      <div id="table"></div>
+    </div>
+    <script src="https://unpkg.com/gridjs/dist/gridjs.umd.js"></script>
+    <script>
+      const updateUrl = (prev, query) => {
+        return prev + (prev.indexOf('?') >= 0 ? '&' : '?') + new URLSearchParams(query).toString();
+      };
+
+      new gridjs.Grid({
+        columns: [
+          { id: 'foodid', name: 'Food ID', formatter: (cell) => {
+            return gridjs.html('<a href="/foodpage/' + cell + '">' + cell + '</a>');
+          } },
+          { id: 'foodname', name: 'Food Name' },
+          { id: 'energia_laskennallinen', name: 'Energia, laskennallinen, KJ', sort: false },
+          { id: 'rasva', name: 'Rasva, g', sort: false },
+          { id: 'hiilihydraatti_imeytyvä', name: 'Hiilihydraatti imeytyvä, g', sort: false },
+          { id: 'hiilihydraatti_erotuksena', name: 'Hiilihydraatti erotuksena, g', sort: false },
+          { id: 'proteiini', name: 'Proteiini, g', sort: false  },
+          { id: 'alkoholi', name: 'Alkoholi, g', sort: false  },
+          { id: 'tuhka', name: 'Tuhka, g', sort: false  },
+          { id: 'vesi', name: 'Vesi, g', sort: false }
+        ],
+        server: {
+          url: '/api/data',
+          then: results => results.data,
+          total: results => results.total,
+        },
+        search: {
+          enabled: true,
+          server: {
+            url: (prev, search) => {
+              return updateUrl(prev, {search});
+            },
+          },
+        },
+        sort: {
+          enabled: true,
+          multiColumn: true,
+          server: {
+            url: (prev, columns) => {
+              const columnIds = ['foodname', 'energia_laskennallinen', 'rasva', 'hiilihydraatti_imeytyvä', 'hiilihydraatti_erotuksena', 'proteiini', 'alkoholi', 'tuhka', 'vesi'];
+              const sort = columns.map(col => (col.direction === 1 ? '+' : '-') + columnIds[col.index]);
+              return updateUrl(prev, {sort});
+            },
+          },
+        },
+        pagination: {
+          enabled: true,
+          server: {
+            url: (prev, page, limit) => {
+              return updateUrl(prev, {start: page * limit, length: limit});
+            },
+          },
+        },
+      }).render(document.getElementById('table'));
+    </script>
+  </body>
+
+
+{% endblock %}

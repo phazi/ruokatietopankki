@@ -1,0 +1,20 @@
+{% extends "layout.html" %}
+{% block title %}Luo tili{% endblock %}
+{% block content %}
+
+{% if session.username %}
+<p>Olet jo kirjautuneena</p>
+{% else %}
+<h2>Luo uusi käyttäjätunnus</h2>
+<p>Salasanan tulee olla vähintään 4-30 merkkiä pitkä</p>
+<form action="/register" method="POST">
+Tunnus: <input type="text" name="username"> <br>
+Salasana: <input type="password" name="password"> <br>
+<input type="submit" value="Luo käyttäjätunnus">
+</form>
+{% endif %}
+{% if error %}
+<p style="color: red; font-style: italic;"> {{ error_message }}</p>
+{% endif %}
+
+{% endblock %}

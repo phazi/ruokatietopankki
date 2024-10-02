@@ -1,8 +1,10 @@
-from flask import Flask, render_template, request
+import re
+from flask import Flask, redirect, render_template, request, session
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.sql import text
 from db import Food_stats, db, Food
 from os import getenv
+from werkzeug.security import check_password_hash, generate_password_hash
 
 app = Flask(__name__)
 app.secret_key = getenv("SECRET_KEY")
@@ -10,6 +12,56 @@ app.config["SQLALCHEMY_DATABASE_URI"] = getenv("DATABASE_URL")
 db.init_app(app)
 
 
+@app.route("/")
+def index():
+    return render_template('index.html')
+
+@app.route("/login", methods=["GET","POST"])
+def login():
+    if request.method == "POST":
+        username = request.form["username"]
+        password = request.form["password"]
+
+        sql = text("SELECT id, password FROM users WHERE username=:username")
+        result = db.session.execute(sql, {"username":username})
+        user = result.fetchone()    
+        if not user:
+            return render_template("login.html", error_message="username_not_found")
+        else:
+            hash_value = user.password
+            if check_password_hash(hash_value, password):
+                session["username"] = username
+                return redirect("/")
+            else:
+                return render_template("login.html", error_message="wrong_password")        
+        
+    return render_template("login.html")
+
+@app.route("/register", methods=["GET","POST"])
+def register():
+    if request.method == "POST":
+        username = request.form["username"]
+        password = request.form["password"]
+        sql = text("SELECT id FROM users WHERE username=:username")
+        result = db.session.execute(sql, {"username":username})
+        user = result.fetchone()
+        if user:
+            return render_template("register.html", error=True, error_message="User already exists")
+        if (len(password) < 4 or len(password)>30):
+            return render_template("register.html", error=True, error_message="Password too long")
+        else:
+            hash_value = generate_password_hash(password)
+            sql = text("INSERT INTO users (username, password) VALUES (:username, :password)")
+            db.session.execute(sql, {"username":username,"password":hash_value})
+            db.session.commit()
+        #TODO: add check of username and password
+        session["username"] = username
+    return render_template("register.html")
+
+@app.route("/logout")
+def logout():
+    del session["username"]
+    return redirect("/")
 
 @app.route("/foodpage/<int:id>")
 def page(id):
@@ -18,11 +70,7 @@ def page(id):
     food_name = result.fetchone()
     return "Tämä on sivu " + str(id) + " eli " + food_name.foodname
 
-@app.route('/')
-def index():
-    return render_template('all_foods_table.html')
-
-@app.route('/api/data')
+@app.route("/api/data")
 def data():
     query = Food_stats.query
 
@@ -66,4 +114,4 @@ def data():
     }
 
 if __name__ == '__main__':
-    app.run()
+    app.run(debug=True)
