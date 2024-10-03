@@ -64,11 +64,26 @@ def logout():
     return redirect("/")
 
 @app.route("/foodpage/<int:id>")
-def page(id):
-    sql = text("SELECT foodname FROM food WHERE foodid = (:id)")
+def foodpage(id):
+    sql = text("""SELECT foodname
+               ,ROUND(energia_laskennallinen,1)      as energia_laskennallinen
+               ,ROUND(rasva,1)                       as rasva
+               ,ROUND(hiilihydraatti_imeytyva,1)     as hiilihydraatti_imeytyva
+               ,ROUND(hiilihydraatti_erotuksena,1)   as hiilihydraatti_erotuksena
+               ,ROUND(proteiini,1)                   as proteiini
+               ,ROUND(alkoholi,1)                    as alkoholi
+               ,ROUND(tuhka,1)                       as tuhka
+               ,ROUND(vesi,1)                        as vesi
+               ,ROUND(kcal,1)                        as kcal
+               FROM food_stats 
+               WHERE foodid = (:id)""")
     result = db.session.execute(sql,{"id":id})
-    food_name = result.fetchone()
-    return "Tämä on sivu " + str(id) + " eli " + food_name.foodname
+    food = result.fetchone()
+    return render_template("foodpage.html", food_stats=food)
+
+#@app.route("/my_page")
+#def my_page():
+#    #TODO: list of favourite foods and recipes
 
 @app.route("/api/data")
 def data():

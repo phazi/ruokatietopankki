@@ -43,6 +43,7 @@ class Food_stats(db.Model):
     alkoholi = db.Column(db.Integer)
     tuhka = db.Column(db.Integer)
     vesi = db.Column(db.Integer)
+    kcal = db.Column(db.Integer)
 
     def to_dict(self):
         return {
@@ -55,5 +56,6 @@ class Food_stats(db.Model):
             'proteiini': self.proteiini,
             'alkoholi': self.alkoholi,
             'tuhka': self.tuhka,
-            'vesi': self.vesi
+            'vesi': self.vesi,
+            'kcal': self.kcal
         }

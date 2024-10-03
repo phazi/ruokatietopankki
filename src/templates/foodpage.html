@@ -1,0 +1,40 @@
+{% extends "layout.html" %}
+{% block title %}{{ food_stats.foodname }}{% endblock %}
+{% block content %}
+
+<h4> {{ food_stats.foodname }}</h4>
+<table>
+    <tr>
+        <th>Perusravintoaineet</th>
+        <th></th>
+    </tr>
+    <tr>
+        <td>energia, laskennallinen</td>
+        <td>{{ food_stats.energia_laskennallinen }} kJ ({{ food_stats.kcal }} kcal)</td>
+    </tr>
+    <tr>
+        <td>rasva</td>
+        <td>{{ food_stats.rasva }} g</td>
+    </tr>
+    <tr>
+        <td>hiilihydraatti, imeytyva</td>
+        <td>{{ food_stats.hiilihydraatti_imeytyva }} g</td>
+    </tr>
+    <tr>
+        <td>proteiini</td>
+        <td>{{ food_stats.proteiini }} g</td>
+    </tr>
+    <tr>
+        <td>alkoholi</td>
+        <td>{{ food_stats.alkoholi }}</td>
+    </tr>
+    <tr>
+        <td>tuhka</td>
+        <td>{{ food_stats.tuhka }} g</td>
+    </tr>
+    <tr>
+        <td>vesi</td>
+        <td>{{ food_stats.vesi }} g</td>
+</table>
+
+{% endblock %}
