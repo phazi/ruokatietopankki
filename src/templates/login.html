@@ -5,10 +5,22 @@
 <p>Olet jo kirjautuneena.</p>
 {% else %}
 <h2>Kirjaudu sisään</h2>
-<form action="/login" method="POST">
-Tunnus: <input type="text" name="username"> <br>
-Salasana: <input type="password" name="password"> <br>
-<input type="submit" value="Kirjaudu">
-</form>
+<table>
+    <form action="/login" method="POST">
+        <tr>
+            <td><label for="username">Tunnus</label></td>
+            <td><input type="text" name="username"> </td>
+        </tr>
+        <tr>
+            <td><label for="password">Salasana:</label></td>
+            <td><input type="password" name="password"></td>
+
+        </tr>
+        <tr>
+            <td></td>
+            <td><input type="submit" value="Kirjaudu"></td>
+        </tr>
+    </form>
+</table>
 {% endif %}
 {% endblock %}
