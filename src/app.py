@@ -1,6 +1,7 @@
 from crypt import methods
 from flask import Flask, redirect, render_template, request, session, url_for
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import insert
 from sqlalchemy.sql import text
 from db import Food_stats, db, Food
 from os import getenv
@@ -106,6 +107,24 @@ def add_fav_food(id):
     
 @app.route("/create_recipe", methods=["GET","POST"])
 def create_recipe():
+    if request.method == "POST":
+        userid = users.get_userid(session["username"])
+        description = request.form["description"]
+        recipe_name = request.form["new_recipe"]
+        foodid_list = request.form.getlist("foodid[]")
+        amount_list = request.form.getlist("amount[]")
+
+        insert_user_recipe_sql = text("""INSERT INTO user_recipes (userid,name,description,created_ts)
+                             VALUES (:userid,:recipe_name,:description,NOW()) RETURNING recipeid""") # returns the ID serial of the created row.
+        result = db.session.execute(insert_user_recipe_sql,{"userid":userid,"recipe_name":recipe_name,"description":description}) #result is the newest id that was just created by the insert 
+        newest_recipeid = result.fetchone()[0]
+        db.session.commit()
+
+        for foodid, amount in zip(foodid_list,amount_list):
+            insert_recipe_foods_sql = text("""INSERT INTO recipe_foods (recipeid,foodid,amount)
+                                           VALUES (:newest_recipeid,:foodid,:amount)""")
+            db.session.execute(insert_recipe_foods_sql,{"newest_recipeid":newest_recipeid,"foodid":foodid,"amount":amount})
+            db.session.commit()
     return render_template("create_recipe.html")
 
 

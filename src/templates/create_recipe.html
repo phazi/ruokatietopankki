@@ -1,0 +1,85 @@
+{% extends "layout.html" %}
+{% block title %}Oma sivu{% endblock %}
+{% block content %}
+
+<body>
+    {% if session.username %}
+    <form action="/create_recipe" method="POST">
+        <table>
+            <tr>
+                <td><label for="new_recipe"></label>Luo uusi resepti:</td>
+                <td>
+                    <input type="text" id="new_recipe" name="new_recipe" placeholder="Anna reseptille nimi.." required>
+                </td>
+            </tr>
+            <tr>
+                <td><label for="description"></label>Anna reseptille kuvaus (valinnainen):</td>
+                <td>
+                    <textarea id="description" name="description" rows="5" cols="50"></textarea>
+                </td>
+            </tr>
+            <tr>
+                <td>Listaa kaikki ruoka-aineet:</td>
+                <td>
+                    <table id="inputTable">
+                        <thead>
+                            <tr>
+                                <th>Food ID</th>
+                                <th>Paino, g</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><input type="number" name="foodid[]" /></td>
+                                <td><input type="number" name="amount[]" /></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </td>
+            </tr>
+            <tr>
+                <td></td>
+                <td>
+                    <button id="addRowButton">Lisää ruoka-aine</button>
+                </td>
+            </tr>
+            <tr>
+                <td></td>
+                <td>
+                    <br><br>
+                    <button type="submit">Tallenna</button>
+                </td>
+            </tr>
+        </table>
+
+
+    </form>
+
+    <script>
+        document.getElementById('addRowButton').addEventListener('click', function (event) {
+            event.preventDefault();
+
+            var table = document.getElementById('inputTable');
+            var newRow = table.insertRow();
+
+            var cell1 = newRow.insertCell(0);
+            var cell2 = newRow.insertCell(1);
+
+            var newFoodIdInput = document.createElement('input');
+            newFoodIdInput.type = 'number';
+            newFoodIdInput.name = 'foodid[]';
+
+            var newAmountInput = document.createElement('input');
+            newAmountInput.type = 'number';
+            newAmountInput.name = 'amount[]';
+
+            cell1.appendChild(newFoodIdInput);
+            cell2.appendChild(newAmountInput);
+        });
+    </script>
+
+    {% else %}
+    <a href="/login">Kirjaudu sisään</a> luodaksesi reseptejä
+    {% endif %}
+</body>
+{% endblock %}
