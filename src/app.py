@@ -1,10 +1,13 @@
+from crypt import methods
 import re
-from flask import Flask, redirect, render_template, request, session
+from flask import Flask, redirect, render_template, request, session, url_for
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.sql import text
 from db import Food_stats, db, Food
 from os import getenv
 from werkzeug.security import check_password_hash, generate_password_hash
+import food
+import users
 
 app = Flask(__name__)
 app.secret_key = getenv("SECRET_KEY")
@@ -65,7 +68,8 @@ def logout():
 
 @app.route("/foodpage/<int:id>")
 def foodpage(id):
-    sql = text("""SELECT foodname
+    food_sql = text("""SELECT foodid
+               ,foodname
                ,ROUND(energia_laskennallinen,1)      as energia_laskennallinen
                ,ROUND(rasva,1)                       as rasva
                ,ROUND(hiilihydraatti_imeytyva,1)     as hiilihydraatti_imeytyva
@@ -77,9 +81,51 @@ def foodpage(id):
                ,ROUND(kcal,1)                        as kcal
                FROM food_stats 
                WHERE foodid = (:id)""")
-    result = db.session.execute(sql,{"id":id})
-    food = result.fetchone()
-    return render_template("foodpage.html", food_stats=food)
+    food_result = db.session.execute(food_sql,{"id":id})
+    food_row = food_result.fetchone()
+    if food.food_in_fav_foods(id, users.get_userid(session["username"])) != None:
+        return render_template("foodpage.html", food_stats=food_row,fav_food_added=True)
+    else:
+        return render_template("foodpage.html", food_stats=food_row,fav_food_added=False)
+
+@app.route("/foodpage/<int:id>/add_fav_food", methods=["POST"])
+def add_fav_food(id):
+    userid = users.get_userid(session["username"])
+    if food.food_in_fav_foods(id, userid) == None:
+        food.add_fav_foood(id, userid)
+        foodpage_url = url_for('foodpage',id=id)
+        print("add_fav_food iffissa")
+        return redirect(foodpage_url)
+    else:
+        foodpage_url = url_for('foodpage',id=id)
+        print("add_fav_food elsessa")
+        return redirect(foodpage_url)
+    
+
+# @app.route("/foodpage/<int:id>/add_fav_food", methods=["POST"])
+# def add_fav_food(id):
+#     users_sql = text("""SELECT id FROM users WHERE users.username = :username""")
+#     users_result = db.session.execute(users_sql,{"username":session["username"]})
+#     users_userid = users_result.fetchone()[0]
+#     sql = text("""SELECT user_fav_foods.id FROM user_fav_foods 
+#                WHERE user_fav_foods.userid = :userid
+#                AND user_fav_foods.foodid = :id""")
+#     result = db.session.execute(sql,{"id":id,"userid":users_userid})
+#     fav_food_row = result.fetchone()
+#     if fav_food_row == None:
+#         insert_sql = text("""INSERT INTO user_fav_foods (userid, foodid, created_ts)
+#                            VALUES (:userid,:id, NOW())""")
+#         db.session.execute(insert_sql, {"userid":users_userid,"id":id})
+#         db.session.commit()
+#         foodpage_url = url_for('foodpage',id=id,fav_food_added=False)
+#         print("iffissa: ",fav_food_row)
+#         return redirect(foodpage_url)
+#     else:
+#         foodpage_url = url_for('foodpage',id=id,fav_food_added=True)
+#         print("elsessa: ", fav_food_row)
+#         return redirect(foodpage_url)
+    
+
 
 #@app.route("/my_page")
 #def my_page():

@@ -36,5 +36,16 @@
         <td>vesi</td>
         <td>{{ food_stats.vesi }} g</td>
 </table>
-
+<br>
+{% if session.username %}
+{% if fav_food_added %}
+<p style="color: red; font-style: italic;">Tuote on jo suosikeissasi</p>
+{% else %}
+<form action="/foodpage/{{ food_stats.foodid }}/add_fav_food" method="POST">
+    <input type="submit" value="Lisää suosikeiksi">
+</form>
+{% endif %}
+{% else %}
+<p>Kirjaudu sisään lisätäksesi ruoka suosikiksi</p>
+{% endif %}
 {% endblock %}
