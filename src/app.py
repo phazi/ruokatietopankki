@@ -1,5 +1,4 @@
 from crypt import methods
-import re
 from flask import Flask, redirect, render_template, request, session, url_for
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.sql import text
@@ -17,7 +16,11 @@ db.init_app(app)
 
 @app.route("/")
 def index():
-    return render_template('index.html')
+    if "username" in session:
+        userid = users.get_userid(session["username"])
+        return render_template('index.html', fav_food_rows=food.my_fav_foods(userid))
+    else:
+        return render_template('index.html')
 
 @app.route("/login", methods=["GET","POST"])
 def login():
@@ -101,6 +104,9 @@ def add_fav_food(id):
         print("add_fav_food elsessa")
         return redirect(foodpage_url)
     
+@app.route("/create_recipe", methods=["GET","POST"])
+def create_recipe():
+    return render_template("create_recipe.html")
 
 # @app.route("/foodpage/<int:id>/add_fav_food", methods=["POST"])
 # def add_fav_food(id):
@@ -127,9 +133,24 @@ def add_fav_food(id):
     
 
 
-#@app.route("/my_page")
-#def my_page():
-#    #TODO: list of favourite foods and recipes
+@app.route("/my_page")
+def my_page():
+    userid = users.get_userid(session["username"])
+    fav_food_sql = text("""SELECT food_stats.foodid
+               ,food_stats.foodname
+               ,ROUND(energia_laskennallinen,1)      as energia_laskennallinen
+               ,ROUND(kcal,1)                        as kcal
+               ,ROUND(rasva,1)                       as rasva
+               ,ROUND(hiilihydraatti_imeytyva,1)     as hiilihydraatti_imeytyva
+               ,ROUND(proteiini,1)                   as proteiini
+               ,ROUND(alkoholi,1)                    as alkoholi
+
+               FROM user_fav_foods
+               INNER JOIN food_stats ON user_fav_foods.foodid = food_stats.foodid
+               WHERE userid = (:userid)""")
+    fav_food_results = db.session.execute(fav_food_sql,{"userid":userid})
+    fav_food_rows = fav_food_results.fetchall()
+    return render_template("my_page.html",fav_food_rows=fav_food_rows)
 
 @app.route("/api/data")
 def data():

@@ -1,0 +1,48 @@
+<style>
+    table {
+      border-collapse: collapse;
+      border-spacing: 0;
+      width: 50%;
+      border: 1px solid #ddd;
+    }
+    
+    th, td {
+      text-align: left;
+      padding: 7px;
+    }
+    
+    tr:nth-child(even) {
+      background-color: #f2f2f2;
+    }
+    </style>
+
+<h3>Suosikkiruuat</h3>
+<div>
+    <table>
+        <thead>
+            <tr>
+                <th>Food ID</th>
+                <th>Food Name</th>
+                <th>Energia, laskennallinen, KJ</th>
+                <th>kcal</th>
+                <th>Rasva, g</th>
+                <th>Hiilihydraatti, imeytyvä, g</th>
+                <th>Proteiini, g</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in fav_food_rows %}
+            <tr>
+                <td><a href="/foodpage/{{ row.foodid }}">{{ row.foodid }}</td>
+                <td>{{ row.foodname }}</td>
+                <td>{{ row.energia_laskennallinen }}</td>
+                <td>{{ row.kcal }}</td>
+                <td>{{ row.rasva }}</td>
+                <td>{{ row.hiilihydraatti_imeytyva }}</td>
+                <td>{{ row.proteiini }}</td>
+                <td><div contenteditable> muokkaa minua</div></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>

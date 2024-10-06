@@ -22,3 +22,18 @@ def add_fav_foood(foodid,userid):
         foodpage_url = url_for('foodpage',id=foodid,fav_food_added=False)
         return redirect(foodpage_url)
 
+def my_fav_foods(userid):
+    fav_food_sql = text("""SELECT food_stats.foodid
+               ,food_stats.foodname
+               ,ROUND(energia_laskennallinen,1)      as energia_laskennallinen
+               ,ROUND(kcal,1)                        as kcal
+               ,ROUND(rasva,1)                       as rasva
+               ,ROUND(hiilihydraatti_imeytyva,1)     as hiilihydraatti_imeytyva
+               ,ROUND(proteiini,1)                   as proteiini
+               ,ROUND(alkoholi,1)                    as alkoholi
+
+               FROM user_fav_foods
+               INNER JOIN food_stats ON user_fav_foods.foodid = food_stats.foodid
+               WHERE userid = (:userid)""")
+    fav_food_results = db.session.execute(fav_food_sql,{"userid":userid})
+    return fav_food_results.fetchall()
