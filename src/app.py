@@ -108,49 +108,6 @@ def add_fav_food(id):
 def create_recipe():
     return render_template("create_recipe.html")
 
-# @app.route("/foodpage/<int:id>/add_fav_food", methods=["POST"])
-# def add_fav_food(id):
-#     users_sql = text("""SELECT id FROM users WHERE users.username = :username""")
-#     users_result = db.session.execute(users_sql,{"username":session["username"]})
-#     users_userid = users_result.fetchone()[0]
-#     sql = text("""SELECT user_fav_foods.id FROM user_fav_foods 
-#                WHERE user_fav_foods.userid = :userid
-#                AND user_fav_foods.foodid = :id""")
-#     result = db.session.execute(sql,{"id":id,"userid":users_userid})
-#     fav_food_row = result.fetchone()
-#     if fav_food_row == None:
-#         insert_sql = text("""INSERT INTO user_fav_foods (userid, foodid, created_ts)
-#                            VALUES (:userid,:id, NOW())""")
-#         db.session.execute(insert_sql, {"userid":users_userid,"id":id})
-#         db.session.commit()
-#         foodpage_url = url_for('foodpage',id=id,fav_food_added=False)
-#         print("iffissa: ",fav_food_row)
-#         return redirect(foodpage_url)
-#     else:
-#         foodpage_url = url_for('foodpage',id=id,fav_food_added=True)
-#         print("elsessa: ", fav_food_row)
-#         return redirect(foodpage_url)
-    
-
-
-@app.route("/my_page")
-def my_page():
-    userid = users.get_userid(session["username"])
-    fav_food_sql = text("""SELECT food_stats.foodid
-               ,food_stats.foodname
-               ,ROUND(energia_laskennallinen,1)      as energia_laskennallinen
-               ,ROUND(kcal,1)                        as kcal
-               ,ROUND(rasva,1)                       as rasva
-               ,ROUND(hiilihydraatti_imeytyva,1)     as hiilihydraatti_imeytyva
-               ,ROUND(proteiini,1)                   as proteiini
-               ,ROUND(alkoholi,1)                    as alkoholi
-
-               FROM user_fav_foods
-               INNER JOIN food_stats ON user_fav_foods.foodid = food_stats.foodid
-               WHERE userid = (:userid)""")
-    fav_food_results = db.session.execute(fav_food_sql,{"userid":userid})
-    fav_food_rows = fav_food_results.fetchall()
-    return render_template("my_page.html",fav_food_rows=fav_food_rows)
 
 @app.route("/api/data")
 def data():
