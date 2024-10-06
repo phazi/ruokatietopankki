@@ -30,6 +30,8 @@ Käyttäjä näkee kirjautumatta kaikki ruuat listattuna. Ruoka-taulukossa on li
 
 Käyttäjä pystyy kirjautumaan sovellukseen. Kirjautuneena käyttäjä pystyy lisäämään ruokia suosikiksi kunkin ruuan tuotesivuilta. Kirjautuneen äyttäjän suosikit näytetään etusivulla näkee suosikkiruokansa. Käyttäjä pystyy luomaan uusia reseptejä http://127.0.0.1:5000/create_recipe sivulla. Reseptillä on nimi, kuvaus ja n kappaletta ruokia ja niiden painot grammoina.
 
+Seuraavana tehtävälistalla on muun muassa ulkoasun siistiminen, koodin refactorointi (esim. app.py:n funktioiden siirto asianmukaisiin moduuleihin), koodin kommentointi ja tietoturva-asioiden tarkastaminen.
+
 
 ## Testaus omalla koneella:
 
@@ -55,7 +57,9 @@ $ python3
 ```
 4. luo taulut tietokantaan joko ajamalla ```$ psql < schema.sql``` tai ajamalla ne käsin tietokannassa
 + HUOM! lisää tauluihin haluamasi schema mikäli haluat luoda ne johonkin muuhun kuin oletus (=public) schemaan
-5. aja ruokadata tauluun joko ajamalla ./data/food_stats_sql.sql-tiedoston INSERT INTO lauseet tai sitten kopiomalla ./data/food_stats.csv tiedosto bulkkina postgreen komentorivin kautta esim. näin (huom, vaihda tiedoston polku oikeaksi):
+5. aja ruokadata tauluun. Hidas tapa on ajaa ./data/food_stats_sql.sql-tiedoston INSERT INTO lauseet esim. näin:
+```psql < src/data/food_stats_sql.sql```
+Nopeampi tapa on kopioida ./data/food_stats.csv tiedosto bulkkina postgreen komentorivin kautta esim. näin (huom, vaihda tiedoston polku oikeaksi):
 ```
 \copy food_stats (foodid,foodname,energia_laskennallinen,rasva,hiilihydraatti_imeytyva,hiilihydraatti_erotuksena,proteiini,alkoholi,tuhka,vesi) FROM '/home/pubuntu/harkkatyo/food_stats.csv' DELIMITER ';' CSV HEADER ENCODING 'UTF-8';
 ```
