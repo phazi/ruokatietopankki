@@ -7,6 +7,7 @@ from os import getenv
 from werkzeug.security import check_password_hash, generate_password_hash
 import food
 import users
+import recipes
 
 app = Flask(__name__)
 app.secret_key = getenv("SECRET_KEY")
@@ -18,7 +19,9 @@ db.init_app(app)
 def index():
     if "username" in session:
         userid = users.get_userid(session["username"])
-        return render_template('index.html', fav_food_rows=food.my_fav_foods(userid))
+        my_recipe_rows=recipes.my_recipes_summary(userid)
+        return render_template('index.html', fav_food_rows=food.my_fav_foods(userid), 
+                               my_recipe_rows=recipes.my_recipes_summary(userid))
     else:
         return render_template('index.html')
 
@@ -86,10 +89,13 @@ def foodpage(id):
                WHERE foodid = (:id)""")
     food_result = db.session.execute(food_sql,{"id":id})
     food_row = food_result.fetchone()
-    if food.food_in_fav_foods(id, users.get_userid(session["username"])) != None:
-        return render_template("foodpage.html", food_stats=food_row,fav_food_added=True)
+    if "username" in session:
+        if food.food_in_fav_foods(id, users.get_userid(session["username"])) != None:
+            return render_template("foodpage.html", food_stats=food_row,fav_food_added=True)
+        else:
+            return render_template("foodpage.html", food_stats=food_row,fav_food_added=False)
     else:
-        return render_template("foodpage.html", food_stats=food_row,fav_food_added=False)
+        return render_template("foodpage.html", food_stats=food_row)
 
 @app.route("/foodpage/<int:id>/add_fav_food", methods=["POST"])
 def add_fav_food(id):
@@ -105,8 +111,52 @@ def add_fav_food(id):
         return redirect(foodpage_url)
     
 @app.route("/recipepage/<int:recipeid>")
-def recipepage():
-    return render_template("/")
+def recipepage(recipeid):
+    userid = users.get_userid(session["username"])
+    recipe_sql = text("""SELECT recipe_foods.recipeid
+                            ,user_recipes.name
+                            ,user_recipes.description
+                            ,user_recipes.created_ts
+                            ,ROUND(SUM(food_stats.energia_laskennallinen * recipe_foods.amount), 1) AS energia_laskennallinen
+                            ,ROUND(SUM(food_stats.rasva * recipe_foods.amount), 1) AS rasva
+                            ,ROUND(SUM(food_stats.hiilihydraatti_imeytyva * recipe_foods.amount), 1) AS hiilihydraatti_imeytyva
+                            ,ROUND(SUM(food_stats.hiilihydraatti_erotuksena * recipe_foods.amount), 1) AS hiilihydraatti_erotuksena
+                            ,ROUND(SUM(food_stats.proteiini * recipe_foods.amount), 1) AS proteiini
+                            ,ROUND(SUM(food_stats.alkoholi * recipe_foods.amount), 1) AS alkoholi
+                            ,ROUND(SUM(food_stats.tuhka * recipe_foods.amount), 1) AS tuhka
+                            ,ROUND(SUM(food_stats.vesi * recipe_foods.amount), 1) AS vesi
+                            ,ROUND(SUM(food_stats.kcal * recipe_foods.amount), 1) AS kcal
+                        FROM user_recipes
+                        INNER JOIN recipe_foods ON user_recipes.userid = :userid
+                            AND user_recipes.recipeid = :recipeid
+                            AND user_recipes.recipeid = recipe_foods.recipeid
+                        INNER JOIN food_stats ON recipe_foods.recipeid = user_recipes.recipeid
+                            AND recipe_foods.foodid = food_stats.foodid
+                        GROUP BY recipe_foods.recipeid
+                            ,user_recipes.name
+                            ,user_recipes.description
+                            ,user_recipes.created_ts""")
+    recipe_result = db.session.execute(recipe_sql,{"userid":userid,"recipeid":recipeid})
+    recipe_first_row = recipe_result.fetchone()
+    recipe_foods_sql = text("""SELECT recipe_foods.amount
+                                ,food_stats.foodid
+                                ,food_stats.foodname
+                                ,ROUND(food_stats.energia_laskennallinen, 1) * recipe_foods.amount AS energia_laskennallinen
+                                ,ROUND(food_stats.rasva, 1) * recipe_foods.amount AS rasva
+                                ,ROUND(food_stats.hiilihydraatti_imeytyva, 1) * recipe_foods.amount AS hiilihydraatti_imeytyva
+                                ,ROUND(food_stats.hiilihydraatti_erotuksena, 1) * recipe_foods.amount AS hiilihydraatti_erotuksena
+                                ,ROUND(food_stats.proteiini, 1) * recipe_foods.amount AS proteiini
+                                ,ROUND(food_stats.alkoholi, 1) * recipe_foods.amount AS alkoholi
+                                ,ROUND(food_stats.tuhka, 1) * recipe_foods.amount AS tuhka
+                                ,ROUND(food_stats.vesi, 1) * recipe_foods.amount AS vesi
+                                ,ROUND(food_stats.kcal, 1) * recipe_foods.amount AS kcal
+                            FROM recipe_foods
+                            INNER JOIN food_stats ON recipe_foods.recipeid = :recipeid
+                                AND recipe_foods.foodid = food_stats.foodid""")
+    recipe_foods_results = db.session.execute(recipe_foods_sql,{"recipeid":recipe_first_row.recipeid})
+    recipe_food_rows = recipe_foods_results.fetchall()
+    
+    return render_template("/recipepage.html",recipe_rows=recipe_food_rows,recipe_first_row=recipe_first_row)
 
     
 @app.route("/create_recipe", methods=["GET","POST"])

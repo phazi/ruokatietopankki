@@ -4,19 +4,23 @@
 
 {% if session.username %}
 {% include 'my_fav_foods.html' %}
+<br>
+<hr>
+{% include 'my_recipes.html' %}
+<br>
+{% else %}
+<p>Kirjautumalla sisään voit lisätä ruoka-aineita suosikeiksi ja luoda reseptejä</p>
 {% endif %}
 
   <head>
     <link href="https://unpkg.com/gridjs/dist/theme/mermaid.min.css" rel="stylesheet" />
   </head>
   <body>
-    <p><br><br>Tämä on aloitussivu. Voit hakea alla olevasta taulukosta kaikkia tietokannassa olevia ruoka-aineita. <br>
-      Kirjautumalla sisään voit lisätä ruoka-aineita suosikeiksi ja luoda reseptejä <br><br>
-    </p>
     <div>
-      <h3>Kaikki ruoka-aineet</h3>
       <hr>
-      <div style="width: 90%; margin: 0 auto;" id="table"></div>
+      <h3>Kaikki ruoka-aineet</h3>
+      
+      <div style="width: 100%; margin: 0 auto;" id="table"></div>
     </div>
       <script src="https://unpkg.com/gridjs/dist/gridjs.umd.js"></script>
       <script>

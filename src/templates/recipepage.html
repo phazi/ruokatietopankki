@@ -1,0 +1,97 @@
+{% extends "layout.html" %}
+{% block title %}{{ recipe_first_row.name }}{% endblock %}
+{% block content %}
+
+<style>
+    table {
+        border-collapse: collapse;
+        border-spacing: 0;
+        width: 50%;
+        border: 1px solid #ddd;
+    }
+
+    th,
+    td {
+        text-align: left;
+        padding: 7px;
+    }
+
+    tr:nth-child(even) {
+        background-color: #f2f2f2;
+    }
+</style>
+<table>
+    <thead>
+        <tr>
+            <th>Reseptin tiedot:</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>Nimi:</td>
+            <td>{{ recipe_first_row.name }}</td>
+        </tr>
+        <tr>
+            <td>Kuvaus:</td>
+            <td>{{ recipe_first_row.description }}</td>
+        </tr>
+        <tr>
+            <td>Luotu:</td>
+            <td>{{ recipe_first_row.created_ts }}</td>
+        </tr>
+        <tr>
+            <td>Energia yhteensä, kJ</td>
+            <td>{{ recipe_first_row.energia_laskennallinen }}</td>
+        </tr>
+        <tr>
+            <td>kcal yhteensä</td>
+            <td>{{ recipe_first_row.kcal }}</td>
+        </tr>
+        <tr>
+            <td>Hiilihydraatti yhteensä, g</td>
+            <td>{{ recipe_first_row.hiilihydraatti_imeytyva }}</td>
+        </tr>
+        <tr>
+            <td>Rasva yhteensä, g</td>
+            <td>{{ recipe_first_row.rasva }}</td>
+        </tr>
+        <tr>
+            <td>Proteiini yhteensä, g</td>
+            <td>{{ recipe_first_row.proteiini }}</td>
+        </tr>
+    </tbody>
+</table>
+<br><br>
+
+<table>
+    <thead>
+        <tr>
+            <th>Food ID</th>
+            <th>Nimi</th>
+            <th>Määrä, g</th>
+            <th>Energia, kJ per resepti</th>
+            <th>Kcal per resepti</th>
+            <th>Hiilihydraatti, g per resepti</th>
+            <th>Rasva, g per resepti</th>
+            <th>Proteiini, g per resepti</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for row in recipe_rows %}
+        <tr>
+            <td><a href="/foodpage/{{ row.foodid }}">{{ row.foodid }}</td>
+            <td>{{ row.foodname }}</td>
+            <td>{{ row.amount }}</td>
+            <td>{{ row.energia_laskennallinen }}</td>
+            <td>{{ row.kcal }}</td>
+            <td>{{ row.hiilihydraatti_imeytyva }}</td>
+            <td>{{ row.rasva }}</td>
+            <td>{{ row.proteiini }}</td>
+        </tr>
+    </tbody>
+    {% endfor %}
+</table>
+<br>
+
+{% endblock %}

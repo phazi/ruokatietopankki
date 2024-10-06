@@ -1,0 +1,56 @@
+<style>
+    table {
+        border-collapse: collapse;
+        border-spacing: 0;
+        width: 50%;
+        border: 1px solid #ddd;
+    }
+
+    th,
+    td {
+        text-align: left;
+        padding: 7px;
+    }
+
+    tr:nth-child(even) {
+        background-color: #f2f2f2;
+    }
+</style>
+
+<h3>Omat reseptit</h3>
+<div>
+    <table>
+        <thead>
+            <tr>
+                <th>Reseptin ID</th>
+                <th>Nimi</th>
+                <th>Kuvaus</th>
+                <th>Luotu</th>
+                <th>Energia yhteensä, kJ</th>
+                <th>kcal</th>
+                <th>Hiilihydraatti yhteensä, g</th>
+                <th>Rasva yhteensä, g</th>
+                <th>Proteiini yhteensä, g</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in my_recipe_rows %}
+            <tr>
+                <td><a href="/recipepage/{{ row.recipeid }}">{{ row.recipeid }}</td>
+                <td>{{ row.name }}</td>
+                <td>{{ row.description }}</td>
+                <td>{{ row.created_ts }}</td>
+                <td>{{ row.energia_laskennallinen }}</td>
+                <td>{{ row.kcal }}</td>
+                <td>{{ row.hiilihydraatti_imeytyva }}</td>
+                <td>{{ row.rasva }}</td>
+                <td>{{ row.proteiini }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+<div>
+    <br>
+    <a href="/create_recipe">Lisää uusi resepti</a>
+</div>
