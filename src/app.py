@@ -1,9 +1,8 @@
 from crypt import methods
 from flask import Flask, redirect, render_template, request, session, url_for
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import insert
 from sqlalchemy.sql import text
-from db import Food_stats, db, Food
+from db import Food_stats, db
 from os import getenv
 from werkzeug.security import check_password_hash, generate_password_hash
 import food
@@ -104,6 +103,11 @@ def add_fav_food(id):
         foodpage_url = url_for('foodpage',id=id)
         print("add_fav_food elsessa")
         return redirect(foodpage_url)
+    
+@app.route("/recipepage/<int:recipeid>")
+def recipepage():
+    return render_template("/")
+
     
 @app.route("/create_recipe", methods=["GET","POST"])
 def create_recipe():

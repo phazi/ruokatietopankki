@@ -3,8 +3,8 @@ from sqlalchemy.sql import text
 
 db = SQLAlchemy()
 
-class Food(db.Model):
-    """This class acts as mapping between database object and Python code"""
+"""class Food(db.Model):
+    This class acts as mapping between database object and Python code
 
     foodid = db.Column(db.Integer, primary_key=True)
     edport = db.Column(db.Integer)
@@ -28,7 +28,7 @@ class Food(db.Model):
             'fuclass': self.fuclass,
             'foodname': self.foodname
         }
-
+"""
 
 class Food_stats(db.Model):
     """This class acts as mapping between database object and Python code"""
