@@ -1,6 +1,5 @@
 from db import db
 from sqlalchemy.sql import text
-from flask import redirect, session, url_for
 
 
 def my_recipes_summary(userid):

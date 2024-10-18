@@ -23,4 +23,8 @@
     </form>
 </table>
 {% endif %}
+<br>
+{% if error_message %}
+<p style="color: red; font-style: italic;"> ERROR: {{ error_message }}</p>
+{% endif %}
 {% endblock %}
