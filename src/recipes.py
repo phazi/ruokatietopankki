@@ -2,6 +2,7 @@ from db import db
 from sqlalchemy.sql import text
 from flask import redirect, session, url_for
 
+
 def my_recipes_summary(userid):
     recipe_sql = text("""SELECT recipe_foods.recipeid
                             ,user_recipes.name
@@ -26,5 +27,5 @@ def my_recipes_summary(userid):
                             ,user_recipes.name
                             ,user_recipes.description
                             ,user_recipes.created_ts""")
-    recipe_result = db.session.execute(recipe_sql,{"userid":userid})
+    recipe_result = db.session.execute(recipe_sql, {"userid": userid})
     return recipe_result.fetchall()

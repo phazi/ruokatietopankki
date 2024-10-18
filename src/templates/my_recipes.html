@@ -11,6 +11,7 @@
         text-align: left;
         padding: 7px;
     }
+
     td {
         text-align: left;
         padding: 7px;
@@ -51,9 +52,9 @@
                 <td>{{ row.rasva }}</td>
                 <td>{{ row.proteiini }}</td>
                 <td><a href="/delete_recipe/{{ row.recipeid }}"
-                    onclick="return confirm('Haluatko varmasti poistaa reseptin?');">
-                    <button>Poista resepti</button>
-                </a></td>
+                        onclick="return confirm('Haluatko varmasti poistaa reseptin?');">
+                        <button>Poista resepti</button>
+                    </a></td>
             </tr>
             {% endfor %}
         </tbody>

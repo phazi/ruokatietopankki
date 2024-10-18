@@ -1,25 +1,26 @@
 <style>
     table {
-      border-collapse: collapse;
-      border-spacing: 0;
-      width: 50%;
-      border: 1px solid #ddd;
+        border-collapse: collapse;
+        border-spacing: 0;
+        width: 50%;
+        border: 1px solid #ddd;
     }
-    
+
     th {
         background-color: rgb(185, 238, 244);
         text-align: left;
         padding: 7px;
     }
+
     td {
-      text-align: left;
-      padding: 7px;
+        text-align: left;
+        padding: 7px;
     }
-    
+
     tr:nth-child(even) {
-      background-color: #f2f2f2;
+        background-color: #f2f2f2;
     }
-    </style>
+</style>
 
 <h3>Omat suosikkiruuat</h3>
 <div>
@@ -47,9 +48,9 @@
                 <td>{{ row.hiilihydraatti_imeytyva }}</td>
                 <td>{{ row.proteiini }}</td>
                 <td><a href="/delete_fav_food/{{ row.foodid }}"
-                    onclick="return confirm('Haluatko varmasti poistaa ruuan suosikeistasi?');">
-                    <button>Poista ruoka</button>
-                </a></td>
+                        onclick="return confirm('Haluatko varmasti poistaa ruuan suosikeistasi?');">
+                        <button>Poista ruoka</button>
+                    </a></td>
             </tr>
             {% endfor %}
         </tbody>

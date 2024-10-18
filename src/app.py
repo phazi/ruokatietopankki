@@ -1,6 +1,4 @@
-from crypt import methods
 from flask import Flask, redirect, render_template, request, session, url_for
-from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.sql import text
 from db import Food_stats, db
 from os import getenv
@@ -19,21 +17,25 @@ db.init_app(app)
 def index():
     if "username" in session:
         userid = users.get_userid(session["username"])
-        my_recipe_rows=recipes.my_recipes_summary(userid)
-        return render_template('index.html', fav_food_rows=food.my_fav_foods(userid), 
-                               my_recipe_rows=recipes.my_recipes_summary(userid))
+        my_recipe_rows = recipes.my_recipes_summary(userid)
+        return render_template(
+            "index.html",
+            fav_food_rows=food.my_fav_foods(userid),
+            my_recipe_rows=recipes.my_recipes_summary(userid),
+        )
     else:
-        return render_template('index.html')
+        return render_template("index.html")
 
-@app.route("/login", methods=["GET","POST"])
+
+@app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
         username = request.form["username"]
         password = request.form["password"]
 
         sql = text("SELECT id, password FROM users WHERE username=:username")
-        result = db.session.execute(sql, {"username":username})
-        user = result.fetchone()    
+        result = db.session.execute(sql, {"username": username})
+        user = result.fetchone()
         if not user:
             return render_template("login.html", error_message="username_not_found")
         else:
@@ -42,35 +44,44 @@ def login():
                 session["username"] = username
                 return redirect("/")
             else:
-                return render_template("login.html", error_message="wrong_password")        
-        
+                return render_template("login.html", error_message="wrong_password")
+
     return render_template("login.html")
 
-@app.route("/register", methods=["GET","POST"])
+
+@app.route("/register", methods=["GET", "POST"])
 def register():
     if request.method == "POST":
         username = request.form["username"]
         password = request.form["password"]
         sql = text("SELECT id FROM users WHERE username=:username")
-        result = db.session.execute(sql, {"username":username})
+        result = db.session.execute(sql, {"username": username})
         user = result.fetchone()
         if user:
-            return render_template("register.html", error=True, error_message="User already exists")
-        if (len(password) < 4 or len(password)>30):
-            return render_template("register.html", error=True, error_message="Password too long")
+            return render_template(
+                "register.html", error=True, error_message="User already exists"
+            )
+        if len(password) < 4 or len(password) > 30:
+            return render_template(
+                "register.html", error=True, error_message="Password too long"
+            )
         else:
             hash_value = generate_password_hash(password)
-            sql = text("INSERT INTO users (username, password) VALUES (:username, :password)")
-            db.session.execute(sql, {"username":username,"password":hash_value})
+            sql = text(
+                "INSERT INTO users (username, password) VALUES (:username, :password)"
+            )
+            db.session.execute(sql, {"username": username, "password": hash_value})
             db.session.commit()
-        #TODO: add check of username and password
+        # TODO: add check of username and password
         session["username"] = username
     return render_template("register.html")
+
 
 @app.route("/logout")
 def logout():
     del session["username"]
     return redirect("/")
+
 
 @app.route("/foodpage/<int:id>")
 def foodpage(id):
@@ -87,29 +98,35 @@ def foodpage(id):
                ,ROUND(kcal,1)                        as kcal
                FROM food_stats 
                WHERE foodid = (:id)""")
-    food_result = db.session.execute(food_sql,{"id":id})
+    food_result = db.session.execute(food_sql, {"id": id})
     food_row = food_result.fetchone()
     if "username" in session:
         if food.food_in_fav_foods(id, users.get_userid(session["username"])) != None:
-            return render_template("foodpage.html", food_stats=food_row,fav_food_added=True)
+            return render_template(
+                "foodpage.html", food_stats=food_row, fav_food_added=True
+            )
         else:
-            return render_template("foodpage.html", food_stats=food_row,fav_food_added=False)
+            return render_template(
+                "foodpage.html", food_stats=food_row, fav_food_added=False
+            )
     else:
         return render_template("foodpage.html", food_stats=food_row)
+
 
 @app.route("/foodpage/<int:id>/add_fav_food", methods=["POST"])
 def add_fav_food(id):
     userid = users.get_userid(session["username"])
     if food.food_in_fav_foods(id, userid) is None:
         food.add_fav_foood(id, userid)
-        foodpage_url = url_for('foodpage',id=id)
+        foodpage_url = url_for("foodpage", id=id)
         print("add_fav_food iffissa")
         return redirect(foodpage_url)
     else:
-        foodpage_url = url_for('foodpage',id=id)
+        foodpage_url = url_for("foodpage", id=id)
         print("add_fav_food elsessa")
         return redirect(foodpage_url)
-    
+
+
 @app.route("/recipepage/<int:recipeid>")
 def recipepage(recipeid):
     userid = users.get_userid(session["username"])
@@ -137,7 +154,9 @@ def recipepage(recipeid):
                             ,user_recipes.name
                             ,user_recipes.description
                             ,user_recipes.created_ts""")
-    recipe_result = db.session.execute(recipe_sql,{"userid":userid,"recipeid":recipeid})
+    recipe_result = db.session.execute(
+        recipe_sql, {"userid": userid, "recipeid": recipeid}
+    )
     recipe_first_row = recipe_result.fetchone()
     if recipe_first_row is None:
         return redirect("/")
@@ -156,10 +175,17 @@ def recipepage(recipeid):
                             FROM recipe_foods
                             INNER JOIN food_stats ON recipe_foods.recipeid = :recipeid
                                 AND recipe_foods.foodid = food_stats.foodid""")
-    recipe_foods_results = db.session.execute(recipe_foods_sql,{"recipeid":recipe_first_row.recipeid})
+    recipe_foods_results = db.session.execute(
+        recipe_foods_sql, {"recipeid": recipe_first_row.recipeid}
+    )
     recipe_food_rows = recipe_foods_results.fetchall()
-    
-    return render_template("/recipepage.html",recipe_rows=recipe_food_rows,recipe_first_row=recipe_first_row)
+
+    return render_template(
+        "/recipepage.html",
+        recipe_rows=recipe_food_rows,
+        recipe_first_row=recipe_first_row,
+    )
+
 
 @app.route("/delete_recipe/<int:recipeid>")
 def delete_recipe(recipeid):
@@ -169,9 +195,10 @@ def delete_recipe(recipeid):
         return redirect("/")
     del_recipe_sql = text("""UPDATE user_recipes SET active=FALSE
                         WHERE userid = :userid AND recipeid = :recipeid""")
-    db.session.execute(del_recipe_sql,{"userid":userid,"recipeid":recipeid})
+    db.session.execute(del_recipe_sql, {"userid": userid, "recipeid": recipeid})
     db.session.commit()
     return redirect("/")
+
 
 @app.route("/delete_fav_food/<int:foodid>")
 def delete_fav_food(foodid):
@@ -181,13 +208,12 @@ def delete_fav_food(foodid):
         return redirect("/")
     del_fav_food_sql = text("""UPDATE user_fav_foods SET active=FALSE
                         WHERE userid = :userid AND foodid = :foodid""")
-    db.session.execute(del_fav_food_sql,{"userid":userid,"foodid":foodid})
+    db.session.execute(del_fav_food_sql, {"userid": userid, "foodid": foodid})
     db.session.commit()
     return redirect("/")
 
 
-
-@app.route("/create_recipe", methods=["GET","POST"])
+@app.route("/create_recipe", methods=["GET", "POST"])
 def create_recipe():
     if request.method == "POST":
         userid = users.get_userid(session["username"])
@@ -197,15 +223,25 @@ def create_recipe():
         amount_list = request.form.getlist("amount[]")
 
         insert_user_recipe_sql = text("""INSERT INTO user_recipes (userid,name,description,created_ts)
-                             VALUES (:userid,:recipe_name,:description,NOW()) RETURNING recipeid""") # returns the ID serial of the created row.
-        result = db.session.execute(insert_user_recipe_sql,{"userid":userid,"recipe_name":recipe_name,"description":description}) #result is the newest id that was just created by the insert 
+                             VALUES (:userid,:recipe_name,:description,NOW()) RETURNING recipeid""")  # returns the ID serial of the created row.
+        result = db.session.execute(
+            insert_user_recipe_sql,
+            {"userid": userid, "recipe_name": recipe_name, "description": description},
+        )  # result is the newest id that was just created by the insert
         newest_recipeid = result.fetchone()[0]
         db.session.commit()
 
-        for foodid, amount in zip(foodid_list,amount_list):
+        for foodid, amount in zip(foodid_list, amount_list):
             insert_recipe_foods_sql = text("""INSERT INTO recipe_foods (recipeid,foodid,amount)
                                            VALUES (:newest_recipeid,:foodid,:amount)""")
-            db.session.execute(insert_recipe_foods_sql,{"newest_recipeid":newest_recipeid,"foodid":foodid,"amount":amount})
+            db.session.execute(
+                insert_recipe_foods_sql,
+                {
+                    "newest_recipeid": newest_recipeid,
+                    "foodid": foodid,
+                    "amount": amount,
+                },
+            )
             db.session.commit()
     return render_template("create_recipe.html")
 
@@ -218,40 +254,39 @@ def data():
 
     # below row parses the URL parameters (returns the part after question mark).
     # in this case it returns the value after ?search=
-    search = request.args.get('search') 
+    search = request.args.get("search")
     if search:
-        query = query.filter(db.or_(
-            Food_stats.foodname.ilike(f'%{search}%')
-        ))
+        query = query.filter(db.or_(Food_stats.foodname.ilike(f"%{search}%")))
     total = query.count()
 
     # sorting
-    sort = request.args.get('sort')
+    sort = request.args.get("sort")
     if sort:
         order = []
-        for s in sort.split(','):
+        for s in sort.split(","):
             direction = s[0]
             name = s[1:]
-            if name not in ['foodname']:
-                name = 'foodname'
+            if name not in ["foodname"]:
+                name = "foodname"
             col = getattr(Food_stats, name)
-            if direction == '-':
+            if direction == "-":
                 col = col.desc()
             order.append(col)
         if order:
             query = query.order_by(*order)
 
     # pagination
-    start = request.args.get('start', type=int, default=-1)
-    length = request.args.get('length', type=int, default=-1)
+    start = request.args.get("start", type=int, default=-1)
+    length = request.args.get("length", type=int, default=-1)
     if start != -1 and length != -1:
         query = query.offset(start).limit(length)
 
     # response
     return {
-        'data': [food_stats.to_dict() for food_stats in query],
-        'total': total,
+        "data": [food_stats.to_dict() for food_stats in query],
+        "total": total,
     }
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     app.run(debug=True)
