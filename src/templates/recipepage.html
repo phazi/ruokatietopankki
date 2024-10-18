@@ -10,7 +10,11 @@
         border: 1px solid #ddd;
     }
 
-    th,
+    th {
+        background-color: rgb(185, 238, 244);
+        text-align: left;
+        padding: 7px;
+    }
     td {
         text-align: left;
         padding: 7px;
@@ -93,5 +97,9 @@
     {% endfor %}
 </table>
 <br>
+<a href="/delete_recipe/{{ recipe_first_row.recipeid }}"
+    onclick="return confirm('Haluatko varmasti poistaa reseptin?');">
+    <button>Poista resepti</button>
+</a>
 
 {% endblock %}

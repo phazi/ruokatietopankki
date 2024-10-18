@@ -46,7 +46,8 @@ CREATE TABLE user_fav_foods (
     id SERIAL PRIMARY KEY,
     userid integer,
     foodid integer,
-    created_ts timestamp without time zone
+    created_ts timestamp without time zone,
+    active BOOLEAN NOT NULL DEFAULT TRUE
 );
 
 
@@ -59,7 +60,8 @@ CREATE TABLE user_recipes (
     userid integer NOT NULL,
     name text NOT NULL,
     description text,
-    created_ts timestamp without time zone NOT NULL
+    created_ts timestamp without time zone NOT NULL,
+    active BOOLEAN NOT NULL DEFAULT TRUE
 );
 
 

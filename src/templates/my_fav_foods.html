@@ -6,7 +6,12 @@
       border: 1px solid #ddd;
     }
     
-    th, td {
+    th {
+        background-color: rgb(185, 238, 244);
+        text-align: left;
+        padding: 7px;
+    }
+    td {
       text-align: left;
       padding: 7px;
     }
@@ -28,6 +33,7 @@
                 <th>Rasva, g</th>
                 <th>Hiilihydraatti, imeytyvä, g</th>
                 <th>Proteiini, g</th>
+                <th>Poista ruoka suosikeista</th>
             </tr>
         </thead>
         <tbody>
@@ -40,6 +46,10 @@
                 <td>{{ row.rasva }}</td>
                 <td>{{ row.hiilihydraatti_imeytyva }}</td>
                 <td>{{ row.proteiini }}</td>
+                <td><a href="/delete_fav_food/{{ row.foodid }}"
+                    onclick="return confirm('Haluatko varmasti poistaa ruuan suosikeistasi?');">
+                    <button>Poista ruoka</button>
+                </a></td>
             </tr>
             {% endfor %}
         </tbody>

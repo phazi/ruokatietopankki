@@ -21,6 +21,7 @@ def my_recipes_summary(userid):
                             AND user_recipes.recipeid = recipe_foods.recipeid
                         INNER JOIN food_stats ON recipe_foods.recipeid = user_recipes.recipeid
                             AND recipe_foods.foodid = food_stats.foodid
+                        WHERE user_recipes.active = TRUE
                         GROUP BY recipe_foods.recipeid
                             ,user_recipes.name
                             ,user_recipes.description

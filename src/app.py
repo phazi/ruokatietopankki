@@ -100,7 +100,7 @@ def foodpage(id):
 @app.route("/foodpage/<int:id>/add_fav_food", methods=["POST"])
 def add_fav_food(id):
     userid = users.get_userid(session["username"])
-    if food.food_in_fav_foods(id, userid) == None:
+    if food.food_in_fav_foods(id, userid) is None:
         food.add_fav_foood(id, userid)
         foodpage_url = url_for('foodpage',id=id)
         print("add_fav_food iffissa")
@@ -132,12 +132,15 @@ def recipepage(recipeid):
                             AND user_recipes.recipeid = recipe_foods.recipeid
                         INNER JOIN food_stats ON recipe_foods.recipeid = user_recipes.recipeid
                             AND recipe_foods.foodid = food_stats.foodid
+                        WHERE user_recipes.active = TRUE
                         GROUP BY recipe_foods.recipeid
                             ,user_recipes.name
                             ,user_recipes.description
                             ,user_recipes.created_ts""")
     recipe_result = db.session.execute(recipe_sql,{"userid":userid,"recipeid":recipeid})
     recipe_first_row = recipe_result.fetchone()
+    if recipe_first_row is None:
+        return redirect("/")
     recipe_foods_sql = text("""SELECT recipe_foods.amount
                                 ,food_stats.foodid
                                 ,food_stats.foodname
@@ -158,7 +161,32 @@ def recipepage(recipeid):
     
     return render_template("/recipepage.html",recipe_rows=recipe_food_rows,recipe_first_row=recipe_first_row)
 
-    
+@app.route("/delete_recipe/<int:recipeid>")
+def delete_recipe(recipeid):
+    if "username" in session:
+        userid = users.get_userid(session["username"])
+    else:
+        return redirect("/")
+    del_recipe_sql = text("""UPDATE user_recipes SET active=FALSE
+                        WHERE userid = :userid AND recipeid = :recipeid""")
+    db.session.execute(del_recipe_sql,{"userid":userid,"recipeid":recipeid})
+    db.session.commit()
+    return redirect("/")
+
+@app.route("/delete_fav_food/<int:foodid>")
+def delete_fav_food(foodid):
+    if "username" in session:
+        userid = users.get_userid(session["username"])
+    else:
+        return redirect("/")
+    del_fav_food_sql = text("""UPDATE user_fav_foods SET active=FALSE
+                        WHERE userid = :userid AND foodid = :foodid""")
+    db.session.execute(del_fav_food_sql,{"userid":userid,"foodid":foodid})
+    db.session.commit()
+    return redirect("/")
+
+
+
 @app.route("/create_recipe", methods=["GET","POST"])
 def create_recipe():
     if request.method == "POST":

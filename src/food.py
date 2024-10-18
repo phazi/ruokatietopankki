@@ -9,7 +9,8 @@ def food_in_fav_foods(foodid,userid):
     sql = text("""SELECT user_fav_foods.id 
                FROM user_fav_foods 
                WHERE user_fav_foods.userid = :userid
-               AND user_fav_foods.foodid = :foodid""")
+               AND user_fav_foods.foodid = :foodid
+               AND active = TRUE""")
     result = db.session.execute(sql,{"foodid":foodid,"userid":userid})
     print("userid: ", userid, " foodid: ", foodid)
     return result.fetchone()
@@ -34,6 +35,6 @@ def my_fav_foods(userid):
 
                FROM user_fav_foods
                INNER JOIN food_stats ON user_fav_foods.foodid = food_stats.foodid
-               WHERE userid = (:userid)""")
+               WHERE userid = (:userid) AND active = TRUE""")
     fav_food_results = db.session.execute(fav_food_sql,{"userid":userid})
     return fav_food_results.fetchall()

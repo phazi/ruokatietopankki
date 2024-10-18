@@ -6,7 +6,11 @@
         border: 1px solid #ddd;
     }
 
-    th,
+    th {
+        background-color: rgb(185, 238, 244);
+        text-align: left;
+        padding: 7px;
+    }
     td {
         text-align: left;
         padding: 7px;
@@ -31,6 +35,7 @@
                 <th>Hiilihydraatti yhteensä, g</th>
                 <th>Rasva yhteensä, g</th>
                 <th>Proteiini yhteensä, g</th>
+                <th>Poista resepti</th>
             </tr>
         </thead>
         <tbody>
@@ -45,6 +50,10 @@
                 <td>{{ row.hiilihydraatti_imeytyva }}</td>
                 <td>{{ row.rasva }}</td>
                 <td>{{ row.proteiini }}</td>
+                <td><a href="/delete_recipe/{{ row.recipeid }}"
+                    onclick="return confirm('Haluatko varmasti poistaa reseptin?');">
+                    <button>Poista resepti</button>
+                </a></td>
             </tr>
             {% endfor %}
         </tbody>

@@ -2,6 +2,28 @@
 {% block title %}{{ food_stats.foodname }}{% endblock %}
 {% block content %}
 
+<style>
+    table {
+        border-collapse: collapse;
+        border-spacing: 0;
+        width: 50%;
+        border: 1px solid #ddd;
+    }
+
+    th {
+        background-color: rgb(185, 238, 244);
+        text-align: left;
+        padding: 7px;
+    }
+    td {
+        text-align: left;
+        padding: 7px;
+    }
+
+    tr:nth-child(even) {
+        background-color: #f2f2f2;
+    }
+</style>
 <h4> {{ food_stats.foodname }}</h4>
 <table>
     <tr>
@@ -36,10 +58,13 @@
         <td>vesi</td>
         <td>{{ food_stats.vesi }} g</td>
 </table>
-<br>
+<br><br>
 {% if session.username %}
 {% if fav_food_added %}
-<p style="color: red; font-style: italic;">Tuote on jo suosikeissasi</p>
+<a href="/delete_fav_food/{{ food_stats.foodid }}"
+    onclick="return confirm('Haluatko varmasti poistaa ruuan suosikeistasi?');">
+    <button>Poista ruoka suosikeistasi</button>
+</a>
 {% else %}
 <form action="/foodpage/{{ food_stats.foodid }}/add_fav_food" method="POST">
     <input type="submit" value="Lisää suosikeiksi">
