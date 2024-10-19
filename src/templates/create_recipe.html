@@ -4,7 +4,7 @@
 
 <body>
     {% if session.username %}
-    <form action="/create_recipe" method="POST">
+    <form action="/create_recipe" method="POST" onsubmit="return checkinputs(this)">
         <table>
             <tr>
                 <td><label for="new_recipe"></label>Luo uusi resepti:</td>
@@ -19,7 +19,7 @@
                 </td>
             </tr>
             <tr>
-                <td>Listaa kaikki ruoka-aineet:</td>
+                <td style="vertical-align: top;">Listaa kaikki ruoka-aineet:</td>
                 <td>
                     <table id="inputTable">
                         <thead>
@@ -30,8 +30,8 @@
                         </thead>
                         <tbody>
                             <tr>
-                                <td><input type="number" name="foodid[]" /></td>
-                                <td><input type="number" name="amount[]" /></td>
+                                <td><input type="number" name="foodid[]" required /></td>
+                                <td><input type="number" name="amount[]" required /></td>
                             </tr>
                         </tbody>
                     </table>
@@ -51,33 +51,69 @@
                 </td>
             </tr>
         </table>
-
-
     </form>
 
+    <script>
+        function checkinputs(form) {
+            if (form.new_recipe.value.length < 1 || form.new_recipe.value.length > 100) {
+                alert("Reseptin nimen sallittu pituus on 1-100 merkkiä");
+                return false;
+            }
+            if (form.description.value.length > 2000) {
+                alert("Kuvauksen sallittu pituus on 2000 merkkiä");
+                return false;
+            }
+            return true;
+        }</script>
     <script>
         document.getElementById('addRowButton').addEventListener('click', function (event) {
             event.preventDefault();
 
-            var table = document.getElementById('inputTable');
+            var table = document.getElementById('inputTable').getElementsByTagName('tbody')[0];
             var newRow = table.insertRow();
 
             var cell1 = newRow.insertCell(0);
             var cell2 = newRow.insertCell(1);
+            var cell3 = newRow.insertCell(2);
 
             var newFoodIdInput = document.createElement('input');
             newFoodIdInput.type = 'number';
             newFoodIdInput.name = 'foodid[]';
+            newFoodIdInput.required = true;
 
             var newAmountInput = document.createElement('input');
             newAmountInput.type = 'number';
             newAmountInput.name = 'amount[]';
+            newAmountInput.required = true;
+
+            var removeButton = document.createElement('button');
+            removeButton.type = 'button';
+            removeButton.className = 'removeRowButton';
+            removeButton.textContent = 'Poista rivi';
+
+            removeButton.addEventListener('click', function () {
+                table.deleteRow(newRow.rowIndex - 1);
+            });
 
             cell1.appendChild(newFoodIdInput);
             cell2.appendChild(newAmountInput);
+            cell3.appendChild(removeButton);
+        });
+
+
+        document.querySelectorAll('.removeRowButton').forEach(function (button) {
+            button.addEventListener('click', function () {
+                var row = button.parentElement.parentElement;
+                row.parentElement.removeChild(row);
+            });
         });
     </script>
 
+
+    <br>
+    {% if error_message is not none %}
+    <p style="color: red; font-style: italic;"> ERROR: {{ error_message }}</p>
+    {% endif %}
     <hr>
 
     <head>
@@ -105,11 +141,7 @@
                     { id: 'energia_laskennallinen', name: 'Energia, laskennallinen, KJ', sort: false },
                     { id: 'rasva', name: 'Rasva, g', sort: false },
                     { id: 'hiilihydraatti_imeytyva', name: 'Hiilihydraatti, imeytyvä, g', sort: false },
-                    //   { id: 'hiilihydraatti_erotuksena', name: 'Hiilihydraatti, erotuksena, g', sort: false },
                     { id: 'proteiini', name: 'Proteiini, g', sort: false },
-                    //   { id: 'alkoholi', name: 'Alkoholi, g', sort: false  },
-                    //  { id: 'tuhka', name: 'Tuhka, g', sort: false  },
-                    //  { id: 'vesi', name: 'Vesi, g', sort: false },
                     { id: 'kcal', name: 'kcal', sort: false }
                 ],
                 server: {

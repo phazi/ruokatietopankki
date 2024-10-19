@@ -7,16 +7,16 @@ def my_recipes_summary(userid):
     recipe_sql = text("""SELECT recipe_foods.recipeid
                             ,user_recipes.name
                             ,user_recipes.description
-                            ,user_recipes.created_ts
-                            ,ROUND(SUM(food_stats.energia_laskennallinen * recipe_foods.amount), 1) AS energia_laskennallinen
-                            ,ROUND(SUM(food_stats.rasva * recipe_foods.amount), 1) AS rasva
-                            ,ROUND(SUM(food_stats.hiilihydraatti_imeytyva * recipe_foods.amount), 1) AS hiilihydraatti_imeytyva
-                            ,ROUND(SUM(food_stats.hiilihydraatti_erotuksena * recipe_foods.amount), 1) AS hiilihydraatti_erotuksena
-                            ,ROUND(SUM(food_stats.proteiini * recipe_foods.amount), 1) AS proteiini
-                            ,ROUND(SUM(food_stats.alkoholi * recipe_foods.amount), 1) AS alkoholi
-                            ,ROUND(SUM(food_stats.tuhka * recipe_foods.amount), 1) AS tuhka
-                            ,ROUND(SUM(food_stats.vesi * recipe_foods.amount), 1) AS vesi
-                            ,ROUND(SUM(food_stats.kcal * recipe_foods.amount), 1) AS kcal
+                            ,DATE(user_recipes.created_ts)
+                            ,ROUND(SUM(food_stats.energia_laskennallinen * (recipe_foods.amount / 100)), 1) AS energia_laskennallinen
+                            ,ROUND(SUM(food_stats.rasva * (recipe_foods.amount / 100)), 1) AS rasva
+                            ,ROUND(SUM(food_stats.hiilihydraatti_imeytyva * (recipe_foods.amount / 100)), 1) AS hiilihydraatti_imeytyva
+                            ,ROUND(SUM(food_stats.hiilihydraatti_erotuksena * (recipe_foods.amount / 100)), 1) AS hiilihydraatti_erotuksena
+                            ,ROUND(SUM(food_stats.proteiini * (recipe_foods.amount / 100)), 1) AS proteiini
+                            ,ROUND(SUM(food_stats.alkoholi * (recipe_foods.amount / 100)), 1) AS alkoholi
+                            ,ROUND(SUM(food_stats.tuhka * (recipe_foods.amount / 100)), 1) AS tuhka
+                            ,ROUND(SUM(food_stats.vesi * (recipe_foods.amount / 100)), 1) AS vesi
+                            ,ROUND(SUM(food_stats.kcal * (recipe_foods.amount / 100)), 1) AS kcal
                         FROM user_recipes
                         INNER JOIN recipe_foods ON user_recipes.userid = :userid
                             AND user_recipes.recipeid = recipe_foods.recipeid
@@ -26,7 +26,7 @@ def my_recipes_summary(userid):
                         GROUP BY recipe_foods.recipeid
                             ,user_recipes.name
                             ,user_recipes.description
-                            ,user_recipes.created_ts""")
+                            ,DATE(user_recipes.created_ts)""")
     query_ok, recipe_result = db_execute(recipe_sql, {"userid": userid})
     if query_ok:
         return recipe_result.fetchall()
@@ -39,15 +39,15 @@ def recipe_summary(userid, recipeid):
                             ,user_recipes.name
                             ,user_recipes.description
                             ,user_recipes.created_ts
-                            ,ROUND(SUM(food_stats.energia_laskennallinen * recipe_foods.amount), 1) AS energia_laskennallinen
-                            ,ROUND(SUM(food_stats.rasva * recipe_foods.amount), 1) AS rasva
-                            ,ROUND(SUM(food_stats.hiilihydraatti_imeytyva * recipe_foods.amount), 1) AS hiilihydraatti_imeytyva
-                            ,ROUND(SUM(food_stats.hiilihydraatti_erotuksena * recipe_foods.amount), 1) AS hiilihydraatti_erotuksena
-                            ,ROUND(SUM(food_stats.proteiini * recipe_foods.amount), 1) AS proteiini
-                            ,ROUND(SUM(food_stats.alkoholi * recipe_foods.amount), 1) AS alkoholi
-                            ,ROUND(SUM(food_stats.tuhka * recipe_foods.amount), 1) AS tuhka
-                            ,ROUND(SUM(food_stats.vesi * recipe_foods.amount), 1) AS vesi
-                            ,ROUND(SUM(food_stats.kcal * recipe_foods.amount), 1) AS kcal
+                            ,ROUND(SUM(food_stats.energia_laskennallinen * (recipe_foods.amount / 100)), 1) AS energia_laskennallinen
+                            ,ROUND(SUM(food_stats.rasva * (recipe_foods.amount / 100)), 1) AS rasva
+                            ,ROUND(SUM(food_stats.hiilihydraatti_imeytyva * (recipe_foods.amount / 100)), 1) AS hiilihydraatti_imeytyva
+                            ,ROUND(SUM(food_stats.hiilihydraatti_erotuksena * (recipe_foods.amount / 100)), 1) AS hiilihydraatti_erotuksena
+                            ,ROUND(SUM(food_stats.proteiini * (recipe_foods.amount / 100)), 1) AS proteiini
+                            ,ROUND(SUM(food_stats.alkoholi * (recipe_foods.amount / 100)), 1) AS alkoholi
+                            ,ROUND(SUM(food_stats.tuhka * (recipe_foods.amount / 100)), 1) AS tuhka
+                            ,ROUND(SUM(food_stats.vesi * (recipe_foods.amount / 100)), 1) AS vesi
+                            ,ROUND(SUM(food_stats.kcal * (recipe_foods.amount / 100)), 1) AS kcal
                         FROM user_recipes
                         INNER JOIN recipe_foods ON user_recipes.userid = :userid
                             AND user_recipes.recipeid = :recipeid
@@ -72,15 +72,15 @@ def recipe_foods(recipeid):
     recipe_foods_sql = text("""SELECT recipe_foods.amount
                                 ,food_stats.foodid
                                 ,food_stats.foodname
-                                ,ROUND(food_stats.energia_laskennallinen, 1) * recipe_foods.amount AS energia_laskennallinen
-                                ,ROUND(food_stats.rasva, 1) * recipe_foods.amount AS rasva
-                                ,ROUND(food_stats.hiilihydraatti_imeytyva, 1) * recipe_foods.amount AS hiilihydraatti_imeytyva
-                                ,ROUND(food_stats.hiilihydraatti_erotuksena, 1) * recipe_foods.amount AS hiilihydraatti_erotuksena
-                                ,ROUND(food_stats.proteiini, 1) * recipe_foods.amount AS proteiini
-                                ,ROUND(food_stats.alkoholi, 1) * recipe_foods.amount AS alkoholi
-                                ,ROUND(food_stats.tuhka, 1) * recipe_foods.amount AS tuhka
-                                ,ROUND(food_stats.vesi, 1) * recipe_foods.amount AS vesi
-                                ,ROUND(food_stats.kcal, 1) * recipe_foods.amount AS kcal
+                                ,ROUND(food_stats.energia_laskennallinen * (recipe_foods.amount / 100), 1) AS energia_laskennallinen
+                                ,ROUND(food_stats.rasva * (recipe_foods.amount / 100), 1) AS rasva
+                                ,ROUND(food_stats.hiilihydraatti_imeytyva * (recipe_foods.amount / 100), 1) AS hiilihydraatti_imeytyva
+                                ,ROUND(food_stats.hiilihydraatti_erotuksena * (recipe_foods.amount / 100), 1) AS hiilihydraatti_erotuksena
+                                ,ROUND(food_stats.proteiini * (recipe_foods.amount / 100), 1) AS proteiini
+                                ,ROUND(food_stats.alkoholi * (recipe_foods.amount / 100), 1) AS alkoholi
+                                ,ROUND(food_stats.tuhka * (recipe_foods.amount / 100), 1) AS tuhka
+                                ,ROUND(food_stats.vesi * (recipe_foods.amount / 100), 1) AS vesi
+                                ,ROUND(food_stats.kcal * (recipe_foods.amount / 100), 1) AS kcal
                             FROM recipe_foods
                             INNER JOIN food_stats ON recipe_foods.recipeid = :recipeid
                                 AND recipe_foods.foodid = food_stats.foodid""")

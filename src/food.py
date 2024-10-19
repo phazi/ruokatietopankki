@@ -34,7 +34,7 @@ def add_fav_foood(foodid, userid):
                            VALUES (:userid,:foodid, NOW())""")
     db.session.execute(insert_sql, {"userid": userid, "foodid": foodid})
     db.session.commit()
-    foodpage_url = url_for("foodpage", id=foodid, fav_food_added=False)
+    foodpage_url = url_for("foodpage", foodid=foodid, fav_food_added=False)
     return redirect(foodpage_url)
 
 
@@ -53,3 +53,11 @@ def my_fav_foods(userid):
                WHERE userid = (:userid) AND active = TRUE""")
     fav_food_results = db.session.execute(fav_food_sql, {"userid": userid})
     return fav_food_results.fetchall()
+
+def get_foodids():
+    sql = text("SELECT foodid FROM food_stats GROUP BY foodid ORDER BY foodid")
+    query_ok, result = db_execute(sql,{})
+    if query_ok:
+        return [r[0] for r in result.fetchall()]
+    else:
+        return None
