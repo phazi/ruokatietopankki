@@ -1,4 +1,4 @@
-from db import db
+from db import db, db_commit, db_execute
 from sqlalchemy.sql import text
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -14,8 +14,13 @@ def get_userid(username):
 
 def login(username, password):
     sql = text("SELECT id, username, password FROM users WHERE username=:username")
-    result = db.session.execute(sql, {"username": username})
-    user = result.fetchone()
+    query_ok, result = db_execute(sql, {"username": username})
+    if query_ok:
+        user = result.fetchone()
+        print("def Login user query ok")
+    else:
+        print("ERROR: def Login user query")
+        return False
     if not user:
         return False
     else:
@@ -30,29 +35,19 @@ def login(username, password):
 def register(username, password):
     hash_value = generate_password_hash(password)
     sql = text("INSERT INTO users (username, password) VALUES (:username, :password)")
-    try:
-        db.session.execute(sql, {"username": username, "password": hash_value})
-        db.session.commit()
+
+    if db_commit(sql, {"username": username, "password": hash_value}):
         login(username, password)
         return True
-    except IntegrityError as e:
-        session.rollback()
-        print(f"IntegrityError: {e}")
-    except SQLAlchemyError as e:
-        session.rollback()
-        print(f"SQLAlchemyError: {e}")
-    
-    except Exception as e:
-        session.rollback()
-        print(f"Unexpected error: {e}")
-    return False
+    else:
+        return False
 
 
 def username_exist(username):
     sql = text("""SELECT username FROM users WHERE users.username = :username""")
-    result = db.session.execute(sql, {"username": username})
-    username = result.fetchone()
-    if username is None:
+    query_ok, result = db_execute(sql, {"username": username})
+    if query_ok and result.fetchone() is not None:
         return False
     else:
         return True
+
