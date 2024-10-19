@@ -1,4 +1,3 @@
-from flask import session
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from app import app
@@ -8,44 +7,43 @@ db = None
 app.config["SQLALCHEMY_DATABASE_URI"] = getenv("DATABASE_URL")
 db = SQLAlchemy(app)
 
-def db_commit(sql,parameters):
+
+def db_commit(sql, parameters):
     """Handles commitable queries in database.
     Returns boolean whether commit was successful"""
-    
+
     try:
         db.session.execute(sql, parameters)
         db.session.commit()
         return True
     except IntegrityError as e:
-        session.rollback()
+        db.session.rollback()
         print(f"IntegrityError: {e}")
     except SQLAlchemyError as e:
-        session.rollback()
+        db.session.rollback()
         print(f"SQLAlchemyError: {e}")
-
     except Exception as e:
-        session.rollback()
+        db.session.rollback()
         print(f"Unexpected error: {e}")
     return False
 
 
-def db_execute(sql,parameters):
-    """Handles SQL execute query in database. 
+def db_execute(sql, parameters):
+    """Handles SQL execute query in database.
     Returns query_ok boolean and result of the query"""
-    
+
     try:
         result = db.session.execute(sql, parameters)
         return True, result
     except IntegrityError as e:
-        session.rollback()
+        db.session.rollback()
         print(f"IntegrityError: {e}")
     except SQLAlchemyError as e:
-        session.rollback()
+        db.session.rollback()
         print(f"SQLAlchemyError: {e}")
     except Exception as e:
-        session.rollback()
+        db.session.rollback()
         print(f"Unexpected error: {e}")
-    print("ERROR: db_execute")
     return False, None
 
 
@@ -78,4 +76,3 @@ class Food_stats(db.Model):
             "vesi": self.vesi,
             "kcal": self.kcal,
         }
-

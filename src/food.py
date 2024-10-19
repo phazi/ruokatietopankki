@@ -1,7 +1,23 @@
-from db import db
+from db import db, db_execute
 from sqlalchemy.sql import text
-from flask import redirect, session, url_for
+from flask import redirect, url_for
 
+
+def get_food_stats(foodid):
+    sql = text("""SELECT foodid
+               ,foodname
+               ,ROUND(energia_laskennallinen,1)      as energia_laskennallinen
+               ,ROUND(rasva,1)                       as rasva
+               ,ROUND(hiilihydraatti_imeytyva,1)     as hiilihydraatti_imeytyva
+               ,ROUND(hiilihydraatti_erotuksena,1)   as hiilihydraatti_erotuksena
+               ,ROUND(proteiini,1)                   as proteiini
+               ,ROUND(alkoholi,1)                    as alkoholi
+               ,ROUND(tuhka,1)                       as tuhka
+               ,ROUND(vesi,1)                        as vesi
+               ,ROUND(kcal,1)                        as kcal
+               FROM food_stats 
+               WHERE foodid = (:foodid)""")
+    return db_execute(sql, {"foodid": foodid}) #returns query_ok and result
 
 def food_in_fav_foods(foodid, userid):
     sql = text("""SELECT user_fav_foods.id 
@@ -9,8 +25,7 @@ def food_in_fav_foods(foodid, userid):
                WHERE user_fav_foods.userid = :userid
                AND user_fav_foods.foodid = :foodid
                AND active = TRUE""")
-    result = db.session.execute(sql, {"foodid": foodid, "userid": userid})
-    print("userid: ", userid, " foodid: ", foodid)
+    query_ok, result = db_execute(sql, {"foodid": foodid, "userid": userid})
     return result.fetchone()
 
 

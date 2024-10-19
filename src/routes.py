@@ -1,7 +1,7 @@
 import re
 from flask import redirect, render_template, request, session, url_for
 from sqlalchemy.sql import text
-from db import Food_stats, db
+from db import Food_stats, db, db_commit
 import food
 import users
 import recipes
@@ -11,7 +11,7 @@ from app import app
 @app.route("/")
 def index():
     if "username" in session:
-        userid = users.get_userid(session["username"])
+        userid = session["userid"]
         return render_template(
             "index.html",
             fav_food_rows=food.my_fav_foods(userid),
@@ -23,11 +23,13 @@ def index():
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
-    if request.method == "POST":
+    if request.method == "GET":
+        return render_template("/login.html")
+    elif request.method == "POST":
         username = request.form["username"]
         password = request.form["password"]
 
-        error_message = 1
+        error_message = None
         if not (username and password):
             error_message = "Required fields are missing"
             return render_template("login.html", error_message=error_message)
@@ -36,16 +38,18 @@ def login():
             return render_template("login.html", error_message=error_message)
         else:
             return redirect("/")
-    elif request.method == "GET":
-        return render_template("/login.html")
 
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
-    if request.method == "POST":
+    if request.method == "GET":
+        return render_template("register.html")
+
+    elif request.method == "POST":
         username = request.form["username"]
         password = request.form["password"]
 
+        # username and password validity check:
         error_message = None
         if users.username_exist(username):
             error_message = "User already exists"
@@ -55,12 +59,12 @@ def register():
         elif len(username) < 4 or len(username) > 30:
             error_message = "Username must be 4-30 characters long"
 
-        elif not re.match(r"^[a-zA-Z0-9_\-.]+$", password):
+        elif not re.match(r"^[a-zA-ZåäöÅÄÖ0-9_\-.]+$", password):
             error_message = (
                 "Password can contain only letters, numbers, and following symbols _-."
             )
 
-        elif not re.match(r"^[a-zA-Z0-9]+$", username):
+        elif not re.match(r"^[a-zA-ZåäöÅÄÖ0-9]+$", username):
             error_message = "Username can contain only letters and numbers"
 
         elif not users.register(username, password):
@@ -72,8 +76,6 @@ def register():
             )
         else:
             return redirect("/")
-    elif request.method == "GET":
-        return render_template("register.html")
 
 
 @app.route("/logout")
@@ -82,25 +84,13 @@ def logout():
     return redirect("/")
 
 
-@app.route("/foodpage/<int:id>")
-def foodpage(id):
-    food_sql = text("""SELECT foodid
-               ,foodname
-               ,ROUND(energia_laskennallinen,1)      as energia_laskennallinen
-               ,ROUND(rasva,1)                       as rasva
-               ,ROUND(hiilihydraatti_imeytyva,1)     as hiilihydraatti_imeytyva
-               ,ROUND(hiilihydraatti_erotuksena,1)   as hiilihydraatti_erotuksena
-               ,ROUND(proteiini,1)                   as proteiini
-               ,ROUND(alkoholi,1)                    as alkoholi
-               ,ROUND(tuhka,1)                       as tuhka
-               ,ROUND(vesi,1)                        as vesi
-               ,ROUND(kcal,1)                        as kcal
-               FROM food_stats 
-               WHERE foodid = (:id)""")
-    food_result = db.session.execute(food_sql, {"id": id})
-    food_row = food_result.fetchone()
+@app.route("/foodpage/<int:foodid>")
+def foodpage(foodid):
+    query_ok, result = food.get_food_stats(foodid)
+    if query_ok:
+        food_row = result.fetchone()
     if "username" in session:
-        if food.food_in_fav_foods(id, users.get_userid(session["username"])) is not None:
+        if food.food_in_fav_foods(foodid, session["userid"]) is not None:
             return render_template(
                 "foodpage.html", food_stats=food_row, fav_food_added=True
             )
@@ -112,72 +102,32 @@ def foodpage(id):
         return render_template("foodpage.html", food_stats=food_row)
 
 
-@app.route("/foodpage/<int:id>/add_fav_food", methods=["POST"])
-def add_fav_food(id):
-    userid = users.get_userid(session["username"])
-    if food.food_in_fav_foods(id, userid) is None:
-        food.add_fav_foood(id, userid)
-        foodpage_url = url_for("foodpage", id=id)
-        print("add_fav_food iffissa")
-        return redirect(foodpage_url)
+@app.route("/foodpage/<int:foodid>/add_fav_food", methods=["POST", "GET"])
+def add_fav_food(foodid):
+    foodpage_url = url_for("foodpage", foodid=foodid)
+    if "username" in session:
+        userid = session["userid"]
+        if food.food_in_fav_foods(foodid, userid) is None:
+            food.add_fav_foood(foodid, userid)
+            return redirect(foodpage_url)
+        else:
+            return redirect(foodpage_url)
     else:
-        foodpage_url = url_for("foodpage", id=id)
-        print("add_fav_food elsessa")
         return redirect(foodpage_url)
 
 
 @app.route("/recipepage/<int:recipeid>")
 def recipepage(recipeid):
-    userid = users.get_userid(session["username"])
-    recipe_sql = text("""SELECT recipe_foods.recipeid
-                            ,user_recipes.name
-                            ,user_recipes.description
-                            ,user_recipes.created_ts
-                            ,ROUND(SUM(food_stats.energia_laskennallinen * recipe_foods.amount), 1) AS energia_laskennallinen
-                            ,ROUND(SUM(food_stats.rasva * recipe_foods.amount), 1) AS rasva
-                            ,ROUND(SUM(food_stats.hiilihydraatti_imeytyva * recipe_foods.amount), 1) AS hiilihydraatti_imeytyva
-                            ,ROUND(SUM(food_stats.hiilihydraatti_erotuksena * recipe_foods.amount), 1) AS hiilihydraatti_erotuksena
-                            ,ROUND(SUM(food_stats.proteiini * recipe_foods.amount), 1) AS proteiini
-                            ,ROUND(SUM(food_stats.alkoholi * recipe_foods.amount), 1) AS alkoholi
-                            ,ROUND(SUM(food_stats.tuhka * recipe_foods.amount), 1) AS tuhka
-                            ,ROUND(SUM(food_stats.vesi * recipe_foods.amount), 1) AS vesi
-                            ,ROUND(SUM(food_stats.kcal * recipe_foods.amount), 1) AS kcal
-                        FROM user_recipes
-                        INNER JOIN recipe_foods ON user_recipes.userid = :userid
-                            AND user_recipes.recipeid = :recipeid
-                            AND user_recipes.recipeid = recipe_foods.recipeid
-                        INNER JOIN food_stats ON recipe_foods.recipeid = user_recipes.recipeid
-                            AND recipe_foods.foodid = food_stats.foodid
-                        WHERE user_recipes.active = TRUE
-                        GROUP BY recipe_foods.recipeid
-                            ,user_recipes.name
-                            ,user_recipes.description
-                            ,user_recipes.created_ts""")
-    recipe_result = db.session.execute(
-        recipe_sql, {"userid": userid, "recipeid": recipeid}
-    )
-    recipe_first_row = recipe_result.fetchone()
+    if "username" in session:
+        userid = session["userid"]
+    else:
+        return redirect("/")
+
+    recipe_first_row = recipes.recipe_summary(userid, recipeid).fetchone()
     if recipe_first_row is None:
         return redirect("/")
-    recipe_foods_sql = text("""SELECT recipe_foods.amount
-                                ,food_stats.foodid
-                                ,food_stats.foodname
-                                ,ROUND(food_stats.energia_laskennallinen, 1) * recipe_foods.amount AS energia_laskennallinen
-                                ,ROUND(food_stats.rasva, 1) * recipe_foods.amount AS rasva
-                                ,ROUND(food_stats.hiilihydraatti_imeytyva, 1) * recipe_foods.amount AS hiilihydraatti_imeytyva
-                                ,ROUND(food_stats.hiilihydraatti_erotuksena, 1) * recipe_foods.amount AS hiilihydraatti_erotuksena
-                                ,ROUND(food_stats.proteiini, 1) * recipe_foods.amount AS proteiini
-                                ,ROUND(food_stats.alkoholi, 1) * recipe_foods.amount AS alkoholi
-                                ,ROUND(food_stats.tuhka, 1) * recipe_foods.amount AS tuhka
-                                ,ROUND(food_stats.vesi, 1) * recipe_foods.amount AS vesi
-                                ,ROUND(food_stats.kcal, 1) * recipe_foods.amount AS kcal
-                            FROM recipe_foods
-                            INNER JOIN food_stats ON recipe_foods.recipeid = :recipeid
-                                AND recipe_foods.foodid = food_stats.foodid""")
-    recipe_foods_results = db.session.execute(
-        recipe_foods_sql, {"recipeid": recipe_first_row.recipeid}
-    )
-    recipe_food_rows = recipe_foods_results.fetchall()
+
+    recipe_food_rows = recipes.recipe_foods(recipeid)
 
     return render_template(
         "/recipepage.html",
@@ -189,60 +139,58 @@ def recipepage(recipeid):
 @app.route("/delete_recipe/<int:recipeid>")
 def delete_recipe(recipeid):
     if "username" in session:
-        userid = users.get_userid(session["username"])
+        userid = session["userid"]
     else:
         return redirect("/")
     del_recipe_sql = text("""UPDATE user_recipes SET active=FALSE
                         WHERE userid = :userid AND recipeid = :recipeid""")
-    db.session.execute(del_recipe_sql, {"userid": userid, "recipeid": recipeid})
-    db.session.commit()
+    db_commit(del_recipe_sql, {"userid": userid, "recipeid": recipeid})
     return redirect("/")
 
 
 @app.route("/delete_fav_food/<int:foodid>")
 def delete_fav_food(foodid):
     if "username" in session:
-        userid = users.get_userid(session["username"])
+        userid = session["userid"]
     else:
         return redirect("/")
     del_fav_food_sql = text("""UPDATE user_fav_foods SET active=FALSE
                         WHERE userid = :userid AND foodid = :foodid""")
-    db.session.execute(del_fav_food_sql, {"userid": userid, "foodid": foodid})
-    db.session.commit()
+    db_commit(del_fav_food_sql, {"userid": userid, "foodid": foodid})
     return redirect("/")
 
 
 @app.route("/create_recipe", methods=["GET", "POST"])
 def create_recipe():
-    if request.method == "POST":
-        userid = users.get_userid(session["username"])
+    error_message = None
+    if request.method == "POST" and "username" in session:
+        userid = session["userid"]
+
         description = request.form["description"]
         recipe_name = request.form["new_recipe"]
         foodid_list = request.form.getlist("foodid[]")
         amount_list = request.form.getlist("amount[]")
 
-        insert_user_recipe_sql = text("""INSERT INTO user_recipes (userid,name,description,created_ts)
-                             VALUES (:userid,:recipe_name,:description,NOW()) RETURNING recipeid""")  # returns the ID serial of the created row.
-        result = db.session.execute(
-            insert_user_recipe_sql,
-            {"userid": userid, "recipe_name": recipe_name, "description": description},
-        )  # result is the newest id that was just created by the insert
-        newest_recipeid = result.fetchone()[0]
-        db.session.commit()
+        newest_recipeid = recipes.create_recipe(userid, recipe_name, description)
 
         for foodid, amount in zip(foodid_list, amount_list):
-            insert_recipe_foods_sql = text("""INSERT INTO recipe_foods (recipeid,foodid,amount)
-                                           VALUES (:newest_recipeid,:foodid,:amount)""")
-            db.session.execute(
-                insert_recipe_foods_sql,
-                {
-                    "newest_recipeid": newest_recipeid,
-                    "foodid": foodid,
-                    "amount": amount,
-                },
-            )
-            db.session.commit()
-    return render_template("create_recipe.html")
+            row_insert_ok = recipes.add_food_to_recipe(newest_recipeid, foodid, amount)
+
+            if not row_insert_ok:
+                error_message = """An error occured when inserting food to recipe.
+                Please try again."""
+                return render_template(
+                    "create_recipe.html", error_message=error_message
+                )
+        return render_template("create_recipe.html", error_message=None)
+
+    elif request.method == "GET":
+        if "username" in session:
+            userid = session["userid"]
+            return render_template("create_recipe.html", error_message=None)
+        else:
+            error_message = "Not logged in"
+            return render_template("create_recipe.html", error_message=error_message)
 
 
 @app.route("/api/data")
