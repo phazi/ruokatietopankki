@@ -85,13 +85,6 @@ ALTER TABLE ONLY users
 
 
 --
--- Name: user_profiles fk_user; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY user_profiles
-    ADD CONSTRAINT fk_user FOREIGN KEY (user_id) REFERENCES users(id);
-
---
 -- Name: recipe_foods recipe_foods_foodid_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
