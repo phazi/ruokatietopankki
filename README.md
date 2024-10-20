@@ -76,7 +76,7 @@ $ python3
 + HUOM! lisää tauluihin haluamasi schema mikäli haluat luoda ne johonkin muuhun kuin oletus (=public) schemaan
 5. aja ruokadata tauluun. Hidas tapa on ajaa ./data/food_stats_sql.sql-tiedoston INSERT INTO lauseet esim. näin:
 ```psql < src/data/food_stats_sql.sql```
-Nopeampi tapa on kopioida ./data/food_stats.csv tiedosto bulkkina postgreen komentorivin kautta esim. näin (huom, vaihda tiedoston polku oikeaksi):
+Nopeampi tapa on kopioida ./data/food_stats.csv tiedosto bulkkina tietokantaan postgren komentorivin kautta esim. näin (huom, vaihda tiedoston polku oikeaksi):
 ```
 \copy food_stats (foodid,foodname,energia_laskennallinen,rasva,hiilihydraatti_imeytyva,hiilihydraatti_erotuksena,proteiini,alkoholi,tuhka,vesi) FROM '/home/pubuntu/harkkatyo/food_stats.csv' DELIMITER ';' CSV HEADER ENCODING 'UTF-8';
 ```
