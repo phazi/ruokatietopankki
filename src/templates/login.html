@@ -7,6 +7,7 @@
 <h2>Kirjaudu sisään</h2>
 <table>
     <form action="/login" method="POST">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
         <tr>
             <td><label for="username">Tunnus</label></td>
             <td><input type="text" name="username"> </td>

@@ -62,12 +62,16 @@
 <br><br>
 {% if session.username %}
 {% if fav_food_added %}
-<a href="/delete_fav_food/{{ food_stats.foodid }}"
-    onclick="return confirm('Haluatko varmasti poistaa ruuan suosikeistasi?');">
-    <button>Poista ruoka suosikeistasi</button>
-</a>
+<form method="POST" action="/delete_fav_food/{{ food_stats.foodid }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+    <button type="submit" onclick="return confirm('Haluatko varmasti poistaa ruuan suosikeistasi?');">
+        Poista ruoka suosikeistasi
+    </button>
+</form>
+
 {% else %}
 <form action="/foodpage/{{ food_stats.foodid }}/add_fav_food" method="POST">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
     <input type="submit" value="Lisää suosikeiksi">
 </form>
 {% endif %}

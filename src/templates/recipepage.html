@@ -98,9 +98,9 @@
     {% endfor %}
 </table>
 <br>
-<a href="/delete_recipe/{{ recipe_first_row.recipeid }}"
-    onclick="return confirm('Haluatko varmasti poistaa reseptin?');">
-    <button>Poista resepti</button>
-</a>
+<form method="POST" action="/delete_recipe/{{ recipe_first_row.recipeid }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+    <button type="submit" onclick="return confirm('Haluatko varmasti poistaa reseptin?');">Poista resepti</button>
+</form>
 
 {% endblock %}

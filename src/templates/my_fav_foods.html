@@ -47,10 +47,13 @@
                 <td>{{ row.rasva }}</td>
                 <td>{{ row.hiilihydraatti_imeytyva }}</td>
                 <td>{{ row.proteiini }}</td>
-                <td><a href="/delete_fav_food/{{ row.foodid }}"
-                        onclick="return confirm('Haluatko varmasti poistaa ruuan suosikeistasi?');">
-                        <button>Poista</button>
-                    </a></td>
+                <td>
+                    <form method="POST" action="/delete_fav_food/{{ row.foodid }}">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                        <button type="submit"
+                            onclick="return confirm('Haluatko varmasti poistaa ruuan suosikeistasi?');">Poista</button>
+                    </form>
+                </td>
             </tr>
             {% endfor %}
         </tbody>

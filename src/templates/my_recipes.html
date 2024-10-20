@@ -51,10 +51,13 @@
                 <td>{{ row.hiilihydraatti_imeytyva }}</td>
                 <td>{{ row.rasva }}</td>
                 <td>{{ row.proteiini }}</td>
-                <td><a href="/delete_recipe/{{ row.recipeid }}"
-                        onclick="return confirm('Haluatko varmasti poistaa reseptin?');">
-                        <button>Poista</button>
-                    </a></td>
+                <td>
+                    <form method="POST" action="/delete_recipe/{{ row.recipeid }}">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                        <button type="submit"
+                            onclick="return confirm('Haluatko varmasti poistaa reseptin?');">Poista</button>
+                    </from>
+                </td>
             </tr>
             {% endfor %}
         </tbody>

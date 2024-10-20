@@ -136,7 +136,7 @@ def recipepage(recipeid):
     )
 
 
-@app.route("/delete_recipe/<int:recipeid>")
+@app.route("/delete_recipe/<int:recipeid>", methods=["POST", "GET"])
 def delete_recipe(recipeid):
     if "username" in session:
         userid = session["userid"]
@@ -148,7 +148,7 @@ def delete_recipe(recipeid):
     return redirect("/")
 
 
-@app.route("/delete_fav_food/<int:foodid>")
+@app.route("/delete_fav_food/<int:foodid>", methods=["POST"])
 def delete_fav_food(foodid):
     if "username" in session:
         userid = session["userid"]

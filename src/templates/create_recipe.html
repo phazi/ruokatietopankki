@@ -5,6 +5,7 @@
 <body>
     {% if session.username %}
     <form action="/create_recipe" method="POST" onsubmit="return checkinputs(this)">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
         <table>
             <tr>
                 <td><label for="new_recipe"></label>Luo uusi resepti:</td>
