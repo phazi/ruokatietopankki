@@ -55,8 +55,8 @@
                     <form method="POST" action="/delete_recipe/{{ row.recipeid }}">
                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
                         <button type="submit"
-                            onclick="return confirm('Haluatko varmasti poistaa reseptin?');">Poista</button>
-                    </from>
+                            onclick="return confirm('Haluatko varmasti poistaa reseptin: {{ row.name }}?');">Poista</button>
+                    </form>
                 </td>
             </tr>
             {% endfor %}

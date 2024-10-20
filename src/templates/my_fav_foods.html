@@ -51,7 +51,7 @@
                     <form method="POST" action="/delete_fav_food/{{ row.foodid }}">
                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
                         <button type="submit"
-                            onclick="return confirm('Haluatko varmasti poistaa ruuan suosikeistasi?');">Poista</button>
+                            onclick="return confirm('Haluatko varmasti poistaa seuraavan ruuan suosikeistasi?\n{{ row.foodname }}');">Poista</button>
                     </form>
                 </td>
             </tr>
