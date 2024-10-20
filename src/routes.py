@@ -241,7 +241,7 @@ def data():
         for s in sort.split(","):
             direction = s[0]
             name = s[1:]
-            if name not in ["foodname"]:
+            if name not in ['foodid','foodname', 'energia_laskennallinen', 'rasva', 'hiilihydraatti_imeytyva', 'proteiini', 'kcal']:
                 name = "foodname"
             col = getattr(Food_stats, name)
             if direction == "-":

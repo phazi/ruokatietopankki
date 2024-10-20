@@ -139,11 +139,11 @@
                 columns: [
                     { id: 'foodid', name: 'Food ID' },
                     { id: 'foodname', name: 'Food Name' },
-                    { id: 'energia_laskennallinen', name: 'Energia, laskennallinen, KJ', sort: false },
-                    { id: 'rasva', name: 'Rasva, g', sort: false },
-                    { id: 'hiilihydraatti_imeytyva', name: 'Hiilihydraatti, imeytyvä, g', sort: false },
-                    { id: 'proteiini', name: 'Proteiini, g', sort: false },
-                    { id: 'kcal', name: 'kcal', sort: false }
+                    { id: 'energia_laskennallinen', name: 'Energia, laskennallinen, KJ', sort: true },
+                    { id: 'rasva', name: 'Rasva, g', sort: true },
+                    { id: 'hiilihydraatti_imeytyva', name: 'Hiilihydraatti, imeytyvä, g', sort: true },
+                    { id: 'proteiini', name: 'Proteiini, g', sort: true },
+                    { id: 'kcal', name: 'kcal', sort: true }
                 ],
                 server: {
                     url: '/api/data',
@@ -163,7 +163,7 @@
                     multiColumn: true,
                     server: {
                         url: (prev, columns) => {
-                            const columnIds = ['foodname', 'energia_laskennallinen', 'rasva', 'hiilihydraatti_imeytyvä', 'hiilihydraatti_erotuksena', 'proteiini', 'alkoholi', 'tuhka', 'vesi'];
+                            const columnIds = ['foodid','foodname', 'energia_laskennallinen', 'rasva', 'hiilihydraatti_imeytyva', 'proteiini', 'kcal'];
                             const sort = columns.map(col => (col.direction === 1 ? '+' : '-') + columnIds[col.index]);
                             return updateUrl(prev, { sort });
                         },
