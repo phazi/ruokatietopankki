@@ -6,13 +6,39 @@
 <p>Olet jo kirjautuneena</p>
 {% else %}
 <h2>Luo uusi käyttäjätunnus</h2>
-<p>Salasanan tulee olla vähintään 4-30 merkkiä pitkä</p>
-<form action="/register" method="POST">
+<p>Tunnuksen tulee olla 4-30 merkkiä pitkä ja se saa sisältää kirjaimia ja numeroita</p>
+<p>Salasanan tulee olla 4-30 merkkiä pitkä ja se saa sisältää kirjaimia, 
+    numeroita ja seuraavia merkkejä: ._-</p>
+<form action="/register" method="POST" onsubmit="return checkinputs(this)">
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
-    Tunnus: <input type="text" name="username"> <br>
-    Salasana: <input type="password" name="password"> <br>
-    <input type="submit" value="Luo käyttäjätunnus">
+    <table>
+        <tr>
+            <td><label for="username">Tunnus</label></td>
+            <td><input type="text" name="username" required></td>
+        </tr>
+        <tr>
+            <td><label for="password">Salasana:</label></td>
+            <td><input type="password" name="password" required></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><input type="submit" value="Luo tunnus"></td>
+        </tr>
+    </table>
 </form>
+<script>
+    function checkinputs(form) {
+        if (form.username.value.length > 30) {
+            alert("Syöttämäsi tunnus on liian pitkä");
+            return false;
+        }
+        if (form.password.value.length < 4 || form.password.value.length > 30) {
+            alert("Syöttämäsi salasana ei ole vaatimusten mukainen");
+            return false;
+        }
+        return true;
+    }
+</script>
 {% endif %}
 {% if error %}
 <p style="color: red; font-style: italic;"> {{ error_message }}</p>

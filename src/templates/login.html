@@ -5,27 +5,39 @@
 <p>Olet jo kirjautuneena.</p>
 {% else %}
 <h2>Kirjaudu sisään</h2>
-<table>
-    <form action="/login" method="POST">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+<form action="/login" method="POST" onsubmit="return checkinputs(this)">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+    <table>
         <tr>
             <td><label for="username">Tunnus</label></td>
-            <td><input type="text" name="username"> </td>
+            <td><input type="text" name="username" required></td>
         </tr>
         <tr>
             <td><label for="password">Salasana:</label></td>
-            <td><input type="password" name="password"></td>
-
+            <td><input type="password" name="password" required></td>
         </tr>
         <tr>
             <td></td>
             <td><input type="submit" value="Kirjaudu"></td>
         </tr>
-    </form>
-</table>
+    </table>
+</form>
+<script>
+    function checkinputs(form) {
+        if (form.username.value.length > 30) {
+            alert("Syöttämäsi tunnus on liian pitkä");
+            return false;
+        }
+        if (form.password.value.length > 30) {
+            alert("Syöttämäsi salasana on liian pitkä");
+            return false;
+        }
+        return true;
+    }
+</script>
 {% endif %}
 <br>
 {% if error_message %}
-<p style="color: red; font-style: italic;"> ERROR: {{ error_message }}</p>
+<p style="color: red; font-style: italic;">ERROR: {{ error_message }}</p>
 {% endif %}
 {% endblock %}

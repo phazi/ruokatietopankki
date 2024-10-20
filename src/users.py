@@ -38,10 +38,10 @@ def username_exist(username):
     """Used when checking new user registration.
     Returns False if username does not exist"""
 
-    sql = text("""SELECT username FROM users WHERE users.username = :username""")
+    sql = text("""SELECT 1 FROM users WHERE users.username = :username""")
     query_ok, result = db_execute(sql, {"username": username})
-    if query_ok and result.fetchone() is not None:
-        return False
+    if query_ok and result.fetchone() is None:
+        return False # username does not exist
     else:
-        return True
+        return True # username exists
 
