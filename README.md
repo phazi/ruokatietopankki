@@ -33,6 +33,23 @@ Käyttäjä pystyy kirjautumaan sovellukseen. Kirjautuneena käyttäjä pystyy l
 Seuraavana tehtävälistalla on muun muassa ulkoasun siistiminen, koodin refactorointi (esim. app.py:n funktioiden siirto asianmukaisiin moduuleihin), koodin kommentointi ja tietoturva-asioiden tarkastaminen.
 
 
+## Lopullinen palautus 20.10.2024
+
+#### Sovelluksen toiminta käyttäjän näkökulmasta:
+Sovelluksen etusivulla näkyy taulukko kaikista ruoka-aineista. Käyttäjä pystyy selaamaan taulukkoa kirjautumatta. Taulukon ensimmäisessä sarakkeessa on linkki tarkemmalle tuotesivulle.
+
+Etusivulta käyttäjä pystyy joko kirjautumaan sisään tai luomaan tunnuksen. Kirjautunut käyttäjä näkee etusivulla omat suosikiksi merkkaamansa ruuat sekä käyttäjän luomat reseptit. 
+
+#### Sovelluksen toiminta palvelimella:
+Sovellus tarkistaa käyttäjän syötteet sekä käyttöliittymässä että palvelimella. Käyttäjälle annetaan virheilmoitus virheellisestä syötteestä jo käyttöliittymässä, mutta myös palvelimelta, jos pyyntö pääsee sinne asti. 
+
+Suurin osa taulukoista on tehty HTML taulukkoina suorien SQL-kyselyiden avulla. Kaikki ruoka-aineet näytetään Grid.js taulukon avulla rivimäärän ollessa sen verran iso.
+
+Tietoturvaa on mietitty käyttäjän syötteiden tuplatarkistuksella, parametrisoituina kyselyinä sekä CSRF suojauksella.
+
+Ruoka-aineiden lähteenä käytetään avointa dataa osoitteesta fineli.fi. Data tulee ladata alla olevien ohjeiden mukaan tietokantaan ennen sovelluksen testausta.
+
+
 ## Testaus omalla koneella:
 
 Miten testata sivun toiminta omalla koneella:
