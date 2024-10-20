@@ -1,7 +1,9 @@
+from os import getenv
 from flask import Flask
 from flask_wtf.csrf import CSRFProtect
-from os import getenv
 
+
+"""This module initializes app, loads secret key and implements CSRF protection."""
 
 app = Flask(__name__)
 app.secret_key = getenv("SECRET_KEY")

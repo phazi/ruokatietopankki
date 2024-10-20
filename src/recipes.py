@@ -1,9 +1,12 @@
-from db import db, db_commit, db_execute
+
 from sqlalchemy.sql import text
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
+from db import db, db_commit, db_execute
 
 
 def my_recipes_summary(userid):
+    """Fetches all user's recipes with calculated sum of ingredients for each recipe"""
+
     recipe_sql = text("""SELECT recipe_foods.recipeid
                             ,user_recipes.name
                             ,user_recipes.description
@@ -35,6 +38,8 @@ def my_recipes_summary(userid):
 
 
 def recipe_summary(userid, recipeid):
+    """Fetches one recipe and calculates sum of its ingredients"""
+
     recipe_sql = text("""SELECT recipe_foods.recipeid
                             ,user_recipes.name
                             ,user_recipes.description
@@ -63,12 +68,13 @@ def recipe_summary(userid, recipeid):
         recipe_sql, {"userid": userid, "recipeid": recipeid}
     )
     if query_ok:
-        return recipe_result#
+        return recipe_result
     else:
         return None
 
 
 def recipe_foods(recipeid):
+    """Fetches foods and statistics of one recipe"""
     recipe_foods_sql = text("""SELECT recipe_foods.amount
                                 ,food_stats.foodid
                                 ,food_stats.foodname
@@ -84,22 +90,27 @@ def recipe_foods(recipeid):
                             FROM recipe_foods
                             INNER JOIN food_stats ON recipe_foods.recipeid = :recipeid
                                 AND recipe_foods.foodid = food_stats.foodid""")
-    query_ok, recipe_foods_results = db_execute(recipe_foods_sql, {"recipeid": recipeid})
+    query_ok, recipe_foods_results = db_execute(
+        recipe_foods_sql, {"recipeid": recipeid}
+    )
     if query_ok:
         return recipe_foods_results.fetchall()
     else:
         return None
-    
+
 
 def create_recipe(userid, recipe_name, description):
-    """Inserts new recipe into user_recipes 
+    """Inserts new recipe into user_recipes
     and returns the the ID serial of the created row."""
 
-    sql = text("""INSERT INTO user_recipes (userid,name,description,created_ts)
-                VALUES (:userid,:recipe_name,:description,NOW()) RETURNING recipeid""")  # returns the ID serial of the created row.
-    
+    sql = (
+        text("""INSERT INTO user_recipes (userid,name,description,created_ts)
+                VALUES (:userid,:recipe_name,:description,NOW()) RETURNING recipeid""")
+    )  # returns the ID serial of the created row.
+
     try:
-        result = db.session.execute(sql,
+        result = db.session.execute(
+            sql,
             {"userid": userid, "recipe_name": recipe_name, "description": description},
         )  # result is the newest id that was just created by the insert
         newest_recipeid = result.fetchone()[0]
@@ -117,9 +128,8 @@ def create_recipe(userid, recipe_name, description):
     return False
 
 
-def add_food_to_recipe(recipeid,foodid,amount):
+def add_food_to_recipe(recipeid, foodid, amount):
     sql = text("""INSERT INTO recipe_foods (recipeid,foodid,amount)
                VALUES (:recipeid,:foodid,:amount)""")
-    
-    return db_commit(sql, {"recipeid": recipeid,"foodid": foodid,"amount": amount})
 
+    return db_commit(sql, {"recipeid": recipeid, "foodid": foodid, "amount": amount})

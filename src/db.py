@@ -1,7 +1,8 @@
+from os import getenv
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from app import app
-from os import getenv
+
 
 db = None
 app.config["SQLALCHEMY_DATABASE_URI"] = getenv("DATABASE_URL")
@@ -66,13 +67,15 @@ class Food_stats(db.Model):
         return {
             "foodid": self.foodid,
             "foodname": self.foodname,
-            "energia_laskennallinen": round(float(self.energia_laskennallinen),1),
-            "rasva": round(float(self.rasva),1),
-            "hiilihydraatti_imeytyva": round(float(self.hiilihydraatti_imeytyva),1),
-            "hiilihydraatti_erotuksena": round(float(self.hiilihydraatti_erotuksena),1),
-            "proteiini": round(float(self.proteiini),1),
-            "alkoholi": round(float(self.alkoholi),1),
-            "tuhka": round(float(self.tuhka),1),
-            "vesi": round(float(self.vesi),1),
-            "kcal": round(float(self.kcal),1),
+            "energia_laskennallinen": round(float(self.energia_laskennallinen), 1),
+            "rasva": round(float(self.rasva), 1),
+            "hiilihydraatti_imeytyva": round(float(self.hiilihydraatti_imeytyva), 1),
+            "hiilihydraatti_erotuksena": round(
+                float(self.hiilihydraatti_erotuksena), 1
+            ),
+            "proteiini": round(float(self.proteiini), 1),
+            "alkoholi": round(float(self.alkoholi), 1),
+            "tuhka": round(float(self.tuhka), 1),
+            "vesi": round(float(self.vesi), 1),
+            "kcal": round(float(self.kcal), 1),
         }

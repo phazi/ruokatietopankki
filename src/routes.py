@@ -168,11 +168,11 @@ def create_recipe():
 
         description = request.form["description"]
         recipe_name = request.form["new_recipe"]
-        foodids = request.form.getlist("foodid[]") # returns list of strings
-        amounts = request.form.getlist("amount[]") # returns list of strings
+        foodids = request.form.getlist("foodid[]")  # returns list of strings
+        amounts = request.form.getlist("amount[]")  # returns list of strings
 
-        foodid_list = [int(foodid) for foodid in foodids] # convert to list of integers
-        amount_list = [int(amount) for amount in amounts] # convert to list of integers
+        foodid_list = [int(foodid) for foodid in foodids]  # convert to list of integers
+        amount_list = [int(amount) for amount in amounts]  # convert to list of integers
 
         # validating user input:
         error_message = None
@@ -192,12 +192,13 @@ def create_recipe():
             else:
                 valid_foodids.append(item)
         if invalid_foodids:
-            error_message = f"The following fooids were not recognized: {invalid_foodids}. These were valid: {valid_foodids}"
+            error_message = f"""The following fooids were not recognized: {invalid_foodids}. 
+                            These were valid: {valid_foodids}"""
             return render_template("create_recipe.html", error_message=error_message)
         elif min(amount_list) < 1:
             error_message = "Amounts should be greater than 0"
             return render_template("create_recipe.html", error_message=error_message)
-        
+
         newest_recipeid = recipes.create_recipe(userid, recipe_name, description)
 
         for foodid, amount in zip(foodid_list, amount_list):

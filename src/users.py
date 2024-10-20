@@ -1,8 +1,7 @@
-from db import db_commit, db_execute
 from sqlalchemy.sql import text
 from werkzeug.security import check_password_hash, generate_password_hash
 from flask import session
-
+from db import db_commit, db_execute
 
 
 def login(username, password):
@@ -41,7 +40,6 @@ def username_exist(username):
     sql = text("""SELECT 1 FROM users WHERE users.username = :username""")
     query_ok, result = db_execute(sql, {"username": username})
     if query_ok and result.fetchone() is None:
-        return False # username does not exist
+        return False  # username does not exist
     else:
-        return True # username exists
-
+        return True  # username exists
